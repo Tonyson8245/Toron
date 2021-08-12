@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Login.Join"
+    >
+    <LinearLayout
+        android:id="@+id/action_bar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_margin="10dp"
+            android:id="@+id/btn_back"
+            android:background="@drawable/ic_baseline_arrow_back_ios_24"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="17dp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:text="회원가입"
+            android:textSize="25dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        app:layout_constraintVertical_bias="0.2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="30dp"
+        app:layout_constraintBottom_toTopOf="@+id/btn_join"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/action_bar">
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="5dp">
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            <CheckBox
+                android:layout_marginLeft="10dp"
+                android:id="@+id/checkbox_all"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textStyle="bold"
+                android:text="   전체 동의" />
+
+            </TableRow>
+            <TableRow
+                android:layout_marginTop="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <CheckBox
+                    android:layout_marginLeft="10dp"
+                    android:id="@+id/checkbox_service"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="   [필수] 서비스 이용 약관" />
+
+                <TextView
+                    android:id="@+id/read_service"
+                    android:clickable="true"
+                    android:layout_weight="0.3"
+                    android:layout_width="0dp"
+                    android:layout_height="20dp"
+                    android:textStyle="bold"
+                    android:text="[보기]"
+                    android:textColor="@color/gray_500" />
+            </TableRow>
+
+            <TableRow
+                android:layout_marginTop="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <CheckBox
+                    android:layout_marginLeft="10dp"
+                    android:id="@+id/checkbox_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="   [필수] 개인정보 취급 방침" />
+
+                <TextView
+                    android:id="@+id/read_info"
+                    android:clickable="true"
+                    android:layout_weight="0.3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:text="[보기]"
+                    android:textColor="@color/gray_500" />
+            </TableRow>
+        </TableLayout>
+    </LinearLayout>
+    <Button
+        android:layout_margin="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:id="@+id/btn_join"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="가입" />
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
