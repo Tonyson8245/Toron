@@ -35,6 +35,7 @@ import android.widget.Toast;
 
 import com.example.toron.Login.Join;
 import com.example.toron.Login.Login;
+import com.example.toron.Main.Mainpage;
 import com.example.toron.R;
 import com.example.toron.Retrofit.ApiClient;
 import com.example.toron.Retrofit.Class.Image_upload;
@@ -68,7 +69,7 @@ public class Profile_setting extends AppCompatActivity {
     Button btn_setting,btn_back,btn_overlay_check;
     EditText Ev_date,Ev_nickname;
     LinearLayout btn_change_password,btn_change_phonenum;
-    TextView Tv_nickname_memo;
+    TextView Tv_nickname_memo,btn_logout;
     final static int TAKE_PICTURE = 0;
     static final int FROM_ALBUM = 1;
 
@@ -105,6 +106,7 @@ public class Profile_setting extends AppCompatActivity {
         btn_back = findViewById(R.id.btn_back);
         btn_change_password = findViewById(R.id.btn_change_password);
         btn_overlay_check = findViewById(R.id.btn_overlay_check);
+        btn_logout = findViewById(R.id.btn_logout);
 
         Ev_date  = (EditText) findViewById(R.id.Date);
         Ev_nickname = (EditText) findViewById(R.id.Ev_nickname);
@@ -130,6 +132,8 @@ public class Profile_setting extends AppCompatActivity {
                     mHandler.postDelayed(new Runnable() {
                         public void run() {
                             // 시간 지난 후 실행할 코딩
+//                            Intent mypage = new Intent(Profile_setting.this, Mainpage.class);
+//                            startActivity(mypage);
                             finish();
                         }
                     }, 100); // 0.5초후
@@ -167,6 +171,15 @@ public class Profile_setting extends AppCompatActivity {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 memo_change(Tv_nickname_memo,"black","변경할 닉네임을 2글자 이상으로 입력해주세요");
+            }
+        });
+        btn_logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent logout = new Intent(Profile_setting.this,Login.class);
+                startActivity(logout);
+
+                ActivityCompat.finishAffinity(Profile_setting.this);
             }
         });
     }

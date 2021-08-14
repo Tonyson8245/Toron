@@ -17,11 +17,10 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
 import com.example.toron.Class.ImageLoadTask;
-import com.example.toron.Main.Menu;
+import com.example.toron.Main.Mainpage;
 import com.example.toron.Mypage.Mypage_main;
 import com.example.toron.Request.LoginRequest;
 import com.example.toron.R;
-import com.google.gson.JsonObject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -125,8 +124,9 @@ public class Login extends AppCompatActivity {
         mHandler.postDelayed(new Runnable()  {
             public void run() {
                 // 시간 지난 후 실행할 코딩
-                Intent intent = new Intent(Login.this, Mypage_main.class);
+                Intent intent = new Intent(Login.this, Mainpage.class);
                 startActivity(intent);
+                finish();
             }
         }, 300); // 0.5초후
     }

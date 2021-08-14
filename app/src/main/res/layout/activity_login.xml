@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
     <Button
+        android:visibility="invisible"
         android:id="@+id/back"
         android:layout_width="35dp"
         android:layout_height="35dp"
