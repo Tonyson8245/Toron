@@ -3,12 +3,15 @@ package com.example.toron.Fragment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,6 +20,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.toron.Adapter.NewsRecyclerAdapter;
+import com.example.toron.Mypage.Mypage_main;
+import com.example.toron.News.Search_news;
 import com.example.toron.Retrofit.Class.Article_list;
 import com.example.toron.Retrofit.Class.New_article;
 import com.example.toron.R;
@@ -35,8 +40,10 @@ import retrofit2.Response;
 public class News_fragment extends Fragment {
     String TAG = "!!!FRAG!NEWS";
     private Activity News_activity;
-
     private int page = 0;
+
+    ImageView btn_search;
+
     List<New_article> list = new ArrayList<>();
     private LinearLayoutManager mLayoutManager;
     private RecyclerView recyclerView;
@@ -46,8 +53,9 @@ public class News_fragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.activity_news_fragment, container, false);
-
         recyclerView = (RecyclerView) rootView.findViewById(R.id.news_recyclerView);
+
+        btn_search = rootView.findViewById(R.id.btn_search);
 
         get_News(0);
         recyclerView.setHasFixedSize(true);
@@ -72,7 +80,14 @@ public class News_fragment extends Fragment {
                 }
             }
         });
-        Log.e("Frag", "MainFragment");
+        btn_search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent search = new Intent(getActivity(), Search_news.class);
+                startActivity(search);
+            }
+        });
+
         return rootView;
     }
     @Override
@@ -101,7 +116,7 @@ public class News_fragment extends Fragment {
                         list.addAll(response.body().getList());
                     }
                     else if(response.body().getResult().equals("failed")){
-                        Toast.makeText(News_activity,"하단입니다.",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(News_activity,"마지막 뉴스입니다.",Toast.LENGTH_SHORT).show();
                         page--;
                     }
                 }

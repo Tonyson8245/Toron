@@ -52,7 +52,8 @@
                     android:id="@+id/TV_news_script"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"/>
+                    android:textSize="17dp"
+                    android:text=""/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="20dp"
