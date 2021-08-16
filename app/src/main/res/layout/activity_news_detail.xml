@@ -6,6 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".News.News_detail"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     >
     <LinearLayout
         android:id="@+id/action_bar"
@@ -30,51 +32,92 @@
             android:textSize="13dp"
             android:textStyle="bold" />
     </LinearLayout>
+
     <ScrollView
         android:id="@+id/scrollview"
         android:layout_width="match_parent"
-        android:layout_weight="1"
-        android:layout_height="0dp">
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
         <LinearLayout
-            app:layout_constraintVertical_bias="0.2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="30dp">
-
+            app:layout_constraintVertical_bias="0.2">
             <ImageView
                 android:id="@+id/Img_news"
                 android:layout_width="match_parent"
+                android:paddingHorizontal="30dp"
                 android:layout_height="200dp"
-                android:layout_marginBottom="10dp"/>
+                android:layout_marginBottom="10dp" />
 
             <TextView
-                    android:id="@+id/TV_news_script"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="17dp"
-                    android:text=""/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="20dp"
-                    android:inputType="datetime"
-                    android:id="@+id/Tv_datetime"/>
+                android:id="@+id/TV_news_script"
+                android:paddingHorizontal="30dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="17dp" />
+
+            <TextView
+                android:layout_gravity="right"
+                android:id="@+id/Tv_datetime"
+                android:paddingHorizontal="30dp"
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:inputType="datetime" />
+
             <Button
                 android:id="@+id/btn_website"
+                android:layout_marginHorizontal="30dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="본문으로 연결"/>
-      </LinearLayout>
+                android:text="본문으로 연결" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#C7CDC7"/>
+            <TextView
+                android:id="@+id/reply_qty"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="댓글 0"
+                android:textColor="@color/black"
+                android:textSize="18dp"
+                android:textStyle="bold"/>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/reply_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
     </ScrollView>
-    <LinearLayout
+    <View
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:background="@color/gray_200">
-        <TextView
-            android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#C7CDC7"/>
+    <LinearLayout
+        android:id="@+id/reply_layout"
+        android:paddingVertical="3dp"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:padding="5dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_baseline_message_24"/>
+        <EditText
+            android:id="@+id/Ev_reply_content"
+            android:layout_weight="1"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:text="댓글 추가 예정"
-            android:textSize="18dp"
-            android:gravity="center"/>
+            android:hint="댓글 남기기"/>
+        <Button
+            android:id="@+id/insert_reply"
+            android:layout_width="70dp"
+            android:text="입력"
+            android:layout_height="match_parent"/>
     </LinearLayout>
 </LinearLayout>

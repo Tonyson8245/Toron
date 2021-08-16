@@ -1,22 +1,41 @@
 package com.example.toron.News;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.toron.Adapter.NewsRecyclerAdapter;
+import com.example.toron.Adapter.ReplyRecyclerAdapter;
 import com.example.toron.R;
 import com.example.toron.Retrofit.ApiClient;
 import com.example.toron.Retrofit.Class.Detail_article;
+import com.example.toron.Retrofit.Class.New_article;
+import com.example.toron.Retrofit.Class.Reply;
+import com.example.toron.Retrofit.Class.Reply_response;
+import com.example.toron.Retrofit.Class.Result;
+import com.example.toron.Retrofit.Class.Yesno;
 import com.example.toron.Retrofit.Interface.NewsInterface;
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -24,16 +43,34 @@ import retrofit2.Response;
 
 public class News_detail extends AppCompatActivity {
 
-    String href,title,img,writing,datetime;
+    List<Reply> list = new ArrayList<>();
+    private int page = 0;
+    String href,title,img,writing,datetime,news_idx;
     ImageView Img_news;
-    TextView Tv_news_script,Tv_news_title,Tv_datetime;
-    Button btn_back,btn_website;
-    String TAG = "!!!DETAIL";
+    EditText Ev_reply_content;
+    TextView Tv_news_script,Tv_news_title,Tv_datetime,Tv_reply_qty;
+    ScrollView scrollview;
+    LinearLayout reply_layout;
+    Button btn_back,btn_website,btn_insert_reply;
+    String TAG = "!!!DETAIL",sort="recent",total_qty,user_id;
+    InputMethodManager imm;
+    private RecyclerView recyclerView;
+    private ReplyRecyclerAdapter replyRecyclerAdapter;
+    boolean last_reply=true;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_news_detail);
+
+        SharedPreferences sharedPreferences;
+        sharedPreferences = getSharedPreferences("user_data",0);
+
+        //댓글 데이터를 얻는 부분
+        user_id = sharedPreferences.getString("user_id",null);
+        //쉐어드
+
 
         Intent getdata = getIntent();
         href = getdata.getStringExtra("href");
@@ -41,14 +78,32 @@ public class News_detail extends AppCompatActivity {
         img = getdata.getStringExtra("img");
         writing = getdata.getStringExtra("writing");
         datetime = getdata.getStringExtra("datetime");
+        news_idx = getdata.getStringExtra("news_idx");
+        //인텐트
 
         Img_news = findViewById(R.id.Img_news);
+        Ev_reply_content = findViewById(R.id.Ev_reply_content);
+        Tv_reply_qty = findViewById(R.id.reply_qty);
         Tv_news_script = findViewById(R.id.TV_news_script);
         Tv_news_title = findViewById(R.id.Tv_news_title);
         Tv_datetime = findViewById(R.id.Tv_datetime);
         btn_back = findViewById(R.id.btn_back);
         btn_website = findViewById(R.id.btn_website);
+        btn_insert_reply = findViewById(R.id.insert_reply);
+        reply_layout = findViewById(R.id.reply_layout);
+        scrollview = findViewById(R.id.scrollview);
+        // 바인딩
 
+        get_reply(news_idx,"0",sort,user_id);
+        recyclerView = (RecyclerView) findViewById(R.id.reply_recyclerview);
+        recyclerView.setHasFixedSize(true);
+        replyRecyclerAdapter = new ReplyRecyclerAdapter(this, list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(replyRecyclerAdapter);
+
+        //리사이클러뷰 세팅
+
+        imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
 
         btn_back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,8 +118,35 @@ public class News_detail extends AppCompatActivity {
                 startActivity(website);
             }
         });
+        btn_insert_reply.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                set_reply();
+                Ev_reply_content.setText("");
+                imm.hideSoftInputFromWindow(Ev_reply_content.getWindowToken(), 0);
+            }
+        });
 
+        scrollview.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                Log.d(TAG,String.valueOf(v.canScrollVertically(1)));
+                if((!v.canScrollVertically(1))){
+                    if(page>Integer.parseInt(total_qty) && last_reply){
+                        Toast.makeText(getApplicationContext(),"마지막 댓글입니다.",Toast.LENGTH_SHORT).show();
+                    }
+                    else{
+                        page+=5;
+                        get_reply(news_idx,String.valueOf(page),sort,user_id);
+                    }
+                    last_reply = false;
+                }
+                else last_reply = true;
+            }
+        });
 
+        if(datetime.length()==0) Tv_datetime.setVisibility(View.GONE);
+        if(title.length()==0) Tv_news_title.setVisibility(View.GONE);
     }
 
     @Override
@@ -79,17 +161,20 @@ public class News_detail extends AppCompatActivity {
         call.enqueue(new Callback<Detail_article>() {
             @Override
             public void onResponse(Call<Detail_article> call, Response<Detail_article> response) {
-                Log.d(TAG,response.toString());
                 if(response.body()!=null && response.isSuccessful()){
                     if(response.body().getResult().equals("success")){
+                        news_idx = response.body().getNews_idx();
+                        if(news_idx.equals("no_news_idx")){
+                            reply_layout.setVisibility(View.GONE);
+                            Tv_reply_qty.setText("댓글을 달 수 없는 기사입니다.");
+                            Tv_reply_qty.setGravity(1);
+                        }
                         String content = response.body().getText();
                         content = content.replace("<br>    ","\n");
                         content = content.replace("<br>","\n");
-                        Tv_news_script.setText(content);
+                        Tv_news_script.setText(Html.fromHtml(content));
                     }
                     else{
-                        //본문으로 연결
-                        Log.d(TAG,"error");
                         Tv_news_script.setVisibility(View.GONE);
                     }
                 }
@@ -112,5 +197,59 @@ public class News_detail extends AppCompatActivity {
         }
         Tv_news_title.setText(Html.fromHtml(title));
         Tv_datetime.setText(datetime);
+    }
+
+    private void set_reply(){
+        String reply_user_id;
+        String reply_content;
+        String reply_news_idx;
+
+        reply_user_id = user_id;
+        reply_content = Ev_reply_content.getText().toString();
+        reply_news_idx = news_idx;
+
+        NewsInterface newsInterface = ApiClient.getApiClient().create(NewsInterface.class);
+        Call<Result> call = newsInterface.insert_reply(reply_user_id,reply_content,reply_news_idx);
+        call.enqueue(new Callback<Result>() {
+            @Override
+            public void onResponse(Call<Result> call, Response<Result> response) {
+                if(response.body()!=null && response.isSuccessful()){
+                    if(response.body().getResult().equals("success")) Toast.makeText(getApplicationContext(),"댓글이 입력되었습니다.",Toast.LENGTH_SHORT).show();
+                    else Toast.makeText(getApplicationContext(),"댓글 입력이 실패되었습니다.",Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Result> call, Throwable t) {
+
+            }
+        });
+
+    }
+
+    private void get_reply(String news_idx,String page,String sort,String user_id){
+        NewsInterface newsInterface = ApiClient.getApiClient().create(NewsInterface.class);
+        Call<Reply_response> call = newsInterface.get_reply(news_idx,sort,page);
+
+        call.enqueue(new Callback<Reply_response>() {
+            @Override
+            public void onResponse(Call<Reply_response> call, Response<Reply_response> response) {
+                if(response.isSuccessful() && response.body()!=null){
+                    if(response.body().getResult().equals("success")){
+                        list.addAll(response.body().getReply());
+                        total_qty = response.body().getTotal();
+                        Tv_reply_qty.setText("댓글 " + total_qty);
+                    }
+
+                }
+                else Log.d(TAG,"내용 없음");
+                replyRecyclerAdapter.setList(list,user_id);
+            }
+
+            @Override
+            public void onFailure(Call<Reply_response> call, Throwable t) {
+
+            }
+        });
     }
 }

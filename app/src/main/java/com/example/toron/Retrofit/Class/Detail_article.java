@@ -10,6 +10,8 @@ public class Detail_article {
     @SerializedName("result") private String result;
     @Expose
     @SerializedName("text") private String text;
+    @Expose
+    @SerializedName("news_idx") private String news_idx;
 
     public String getResult() {
         return result;
@@ -27,8 +29,17 @@ public class Detail_article {
         this.text = text;
     }
 
-    public Detail_article(String result, String text) {
+    public String getNews_idx() {
+        return news_idx;
+    }
+
+    public void setNews_idx(String news_idx) {
+        this.news_idx = news_idx;
+    }
+
+    public Detail_article(String result, String text, String news_idx) {
         this.result = result;
         this.text = text;
+        this.news_idx = news_idx;
     }
 }

@@ -14,7 +14,8 @@ public class New_article {
     @SerializedName("news_datetime") private String news_datetime;
     @Expose
     @SerializedName("news_img") private String news_img;
-
+    @Expose
+    @SerializedName("news_idx") private String news_idx;
 
     @Override
     public String toString() {
@@ -24,6 +25,7 @@ public class New_article {
                 ", news_writing='" + news_writing + '\'' +
                 ", news_datetime='" + news_datetime + '\'' +
                 ", news_img='" + news_img + '\'' +
+                ", news_idx='" + news_idx + '\'' +
                 '}';
     }
 
@@ -67,11 +69,20 @@ public class New_article {
         this.news_img = news_img;
     }
 
-    public New_article(String news_href, String news_title, String news_writing, String news_datetime, String news_img) {
+    public String getNews_idx() {
+        return news_idx;
+    }
+
+    public void setNews_idx(String news_idx) {
+        this.news_idx = news_idx;
+    }
+
+    public New_article(String news_href, String news_title, String news_writing, String news_datetime, String news_img, String news_idx) {
         this.news_href = news_href;
         this.news_title = news_title;
         this.news_writing = news_writing;
         this.news_datetime = news_datetime;
         this.news_img = news_img;
+        this.news_idx = news_idx;
     }
 }

@@ -73,7 +73,8 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter<NewsRecyclerAdapte
                     int pos = getAdapterPosition() ;
                     if (pos != RecyclerView.NO_POSITION) {
                         Log.d("!!!adapter",List.get(pos).getNews_href());
-                        mainpage.click_news_detail(List.get(pos).getNews_href(),List.get(pos).getNews_title(),List.get(pos).getNews_img(),List.get(pos).getNews_writing(),List.get(pos).getNews_datetime());
+                        mainpage.click_news_detail(List.get(pos).getNews_href(),List.get(pos).getNews_title(),List.get(pos).getNews_img(),
+                                List.get(pos).getNews_writing(),List.get(pos).getNews_datetime(),List.get(pos).getNews_idx());
                     }
                 }
             }); // 클릭 이벤트 세부 페이지로 보내준다.

@@ -75,13 +75,14 @@ public class Mainpage extends AppCompatActivity {
 
     }
 
-    public void click_news_detail(String href,String title,String img,String writing,String datetime) {
+    public void click_news_detail(String href,String title,String img,String writing,String datetime,String news_idx) {
         Intent news_detail = new Intent(this, News_detail.class);
         news_detail.putExtra("href",href);
         news_detail.putExtra("title",title);
         news_detail.putExtra("img",img);
         news_detail.putExtra("writing",writing);
         news_detail.putExtra("datetime",datetime);
+        news_detail.putExtra("news_idx",news_idx);
         startActivity(news_detail);
     }
 }
