@@ -177,6 +177,10 @@ public class Profile_setting extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent logout = new Intent(Profile_setting.this,Login.class);
+                sharedPreferences = getSharedPreferences("auto_login",0);
+                editor = sharedPreferences.edit();
+                editor.putString("auto_login","OFF");
+                editor.commit();
                 startActivity(logout);
 
                 ActivityCompat.finishAffinity(Profile_setting.this);

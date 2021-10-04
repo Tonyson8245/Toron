@@ -12,16 +12,14 @@ public class Reply {
     @SerializedName("user_nickname") private String user_nickname;
     @Expose
     @SerializedName("user_profile_img") private String user_profile_img;
-
-    @Override
-    public String toString() {
-        return "Reply{" +
-                "content='" + content + '\'' +
-                ", datetime='" + datetime + '\'' +
-                ", user_nickname='" + user_nickname + '\'' +
-                ", user_profile_img='" + user_profile_img + '\'' +
-                '}';
-    }
+    @Expose
+    @SerializedName("reply_status") private String reply_status;
+    @Expose
+    @SerializedName("reply_idx") private String reply_idx;
+    @Expose
+    @SerializedName("reply_like_qty") private String reply_like_qty;
+    @Expose
+    @SerializedName("reply_like_user_id") private String reply_like_user_id;
 
     public String getContent() {
         return content;
@@ -55,10 +53,47 @@ public class Reply {
         this.user_profile_img = user_profile_img;
     }
 
-    public Reply(String content, String datetime, String user_nickname, String user_profile_img) {
+    public String getReply_status() {
+        return reply_status;
+    }
+
+    public void setReply_status(String reply_status) {
+        this.reply_status = reply_status;
+    }
+
+    public String getReply_idx() {
+        return reply_idx;
+    }
+
+    public void setReply_idx(String reply_idx) {
+        this.reply_idx = reply_idx;
+    }
+
+    public String getReply_like_qty() {
+        return reply_like_qty;
+    }
+
+    public void setReply_like_qty(String reply_like_qty) {
+        this.reply_like_qty = reply_like_qty;
+    }
+
+    public String getReply_like_user_id() {
+        return reply_like_user_id;
+    }
+
+    public void setReply_like_user_id(String reply_like_user_id) {
+        this.reply_like_user_id = reply_like_user_id;
+    }
+
+    public Reply(String content, String datetime, String user_nickname, String user_profile_img, String reply_status, String reply_idx, String reply_like_qty, String reply_like_user_id) {
         this.content = content;
         this.datetime = datetime;
         this.user_nickname = user_nickname;
         this.user_profile_img = user_profile_img;
+        this.reply_status = reply_status;
+        this.reply_idx = reply_idx;
+        this.reply_like_qty = reply_like_qty;
+        this.reply_like_user_id = reply_like_user_id;
     }
 }
+

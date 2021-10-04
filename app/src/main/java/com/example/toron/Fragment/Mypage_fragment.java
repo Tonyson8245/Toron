@@ -76,7 +76,6 @@ public class Mypage_fragment extends Fragment {
         user_nickname = sharedPreferences.getString("user_nickname","nick");
         Tv_user_nickname.setText(user_nickname);
         String uristr = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Toron/Storage/Image/profile_img.jpg";
-        Log.d("!!!!되라",uristr);
 
         File files = new File(uristr);
         if(files.exists()==true) {

@@ -47,6 +47,24 @@ public interface NewsInterface {
     Call<Reply_response> get_reply(
             @Query("news_idx") String news_idx,
             @Query("sort") String sort,
-            @Query("page") String page
+            @Query("page") String page,
+            @Query("user_id") String user_id
+    );
+
+    @GET("api/News/Reply/Delete_reply.php")
+    Call<Result> delete_reply(
+            @Query("reply_idx") String reply_idx
+    );
+    @FormUrlEncoded
+    @POST("api/News/Reply/Update_reply.php")
+    Call<Result> update_reply(
+            @Field("reply_idx") String reply_idx,
+            @Field("content") String content
+    );
+    @GET("api/News/Reply/Reply_like.php")
+    Call<Result> reply_like(
+            @Query("reply_idx") String reply_idx,
+            @Query("user_id") String user_id,
+            @Query("onoff") String onoff
     );
 }

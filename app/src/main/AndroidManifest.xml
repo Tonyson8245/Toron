@@ -19,8 +19,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         android:usesCleartextTraffic="true">
-        <activity android:name=".News.Search_news"></activity>
-        <activity android:name=".News.News_detail"></activity>
+        <activity android:name=".Debate.Debate_make"></activity>
+        <activity android:name=".Debate.Debate_room" />
+        <activity android:name=".Debate.Debate_SelectSide" />
+        <activity android:name=".News.Search_news" />
+        <activity android:name=".News.News_detail" />
         <activity android:name=".Mypage.Change_phonenum" />
         <activity android:name=".Mypage.Change_password" />
         <activity android:name=".Mypage.Profile_setting" />
@@ -29,16 +32,16 @@
         <activity android:name=".Login.Find_password" />
         <activity android:name=".Login.Find_id_Activity" />
         <activity android:name=".Login.Find_account" />
-        <activity android:name=".Login.Login"></activity>
-        <activity android:name=".Login.Join" />
-        <activity android:name=".MainActivity" />
-        <activity android:name=".Main.Mainpage">
+        <activity android:name=".Login.Login">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".Login.Join" />
+        <activity android:name=".MainActivity" />
+        <activity android:name=".Main.Mainpage" />
     </application>
 
 </manifest>

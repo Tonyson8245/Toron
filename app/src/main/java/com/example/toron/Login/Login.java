@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -31,9 +32,12 @@ public class Login extends AppCompatActivity {
 
     EditText textID, textPW;
     Button login_btn, signup_btn,account_find_btn;
+    CheckBox CB_auto_login;
 
     SharedPreferences sharedPreferences;
+    SharedPreferences auto_login;
     SharedPreferences.Editor editor;
+    SharedPreferences.Editor auto_login_editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +49,10 @@ public class Login extends AppCompatActivity {
         login_btn = findViewById(R.id.login_button);
         signup_btn = findViewById(R.id.signup_button);
         account_find_btn = findViewById(R.id.btn_find_account);
+        CB_auto_login = findViewById(R.id.CB_auto_login);
 
         sharedPreferences = getSharedPreferences("user_data",0);
+        auto_login = getSharedPreferences("auto_login",0);
         editor = sharedPreferences.edit();
 
         login_btn.setOnClickListener(new View.OnClickListener() {
@@ -68,7 +74,7 @@ public class Login extends AppCompatActivity {
                                     JSONObject result = jsonObject.getJSONObject("result");
                                     Toast.makeText(getApplicationContext(), result.get("user_nickname")+ "님 어서오세요.", Toast.LENGTH_SHORT).show();
                                     save_userdata(result);
-
+                                    auto_login_save();
                                 } else {//실패시
                                     if(jsonObject.getString("message").equals("Wrong password"))  Toast.makeText(getApplicationContext(), "올바르지 않은 비밀번호입니다.", Toast.LENGTH_SHORT).show();
                                     else  Toast.makeText(getApplicationContext(), "존재하지 않는 회원입니다.", Toast.LENGTH_SHORT).show();
@@ -108,6 +114,20 @@ public class Login extends AppCompatActivity {
                 startActivity(account_find);
             }
         });
+
+        if(auto_login.getString("auto_login","OFF").equals("ON")){
+            Intent intent = new Intent(Login.this, Mainpage.class);
+            startActivity(intent);
+            Toast.makeText(getApplicationContext(),"자동 로그인되었습니다.",Toast.LENGTH_SHORT).show();
+            finish();
+        }
+    }
+
+    void auto_login_save(){
+        auto_login_editor =  auto_login.edit();
+        if(CB_auto_login.isChecked()) auto_login_editor.putString("auto_login","ON");// 쉐어드에 저장
+        else auto_login_editor.putString("auto_login","OFF");// 쉐어드에 저장
+        auto_login_editor.commit();
     }
 
     void save_userdata(JSONObject result) throws JSONException {
