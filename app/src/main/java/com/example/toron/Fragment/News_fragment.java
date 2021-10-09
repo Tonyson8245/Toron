@@ -45,7 +45,6 @@ public class News_fragment extends Fragment {
     ImageView btn_search;
 
     List<New_article> list = new ArrayList<>();
-    private LinearLayoutManager mLayoutManager;
     private RecyclerView recyclerView;
     private NewsRecyclerAdapter newsRecyclerAdapter;
 

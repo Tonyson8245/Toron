@@ -32,82 +32,115 @@
             android:textSize="25dp"
             android:textStyle="bold" />
     </LinearLayout>
+
     <ScrollView
-        android:layout_margin="30dp"
-        android:layout_weight="1"
         android:layout_width="match_parent"
-        android:layout_height="0dp">
+        android:layout_height="0dp"
+        android:layout_margin="30dp"
+        android:layout_weight="1">
+
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
             <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:orientation="horizontal">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="논제: "
-                    android:textSize="25dp"/>
+                    android:textSize="20dp" />
+
                 <TextView
                     android:id="@+id/Tv_subject"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="논제 내용"
-                    android:textSize="25dp"/>
+                    android:textSize="20dp" />
             </androidx.appcompat.widget.LinearLayoutCompat>
+
             <androidx.appcompat.widget.LinearLayoutCompat
-                android:background="@drawable/roundborder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="30dp"
+                android:background="@drawable/roundborder"
                 android:orientation="horizontal">
+
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:minHeight="200dp"
+                    android:id="@+id/Tv_description"
                     android:text="토론 내용 설명"
-                    android:textSize="20dp"/>
+                    android:textSize="15dp" />
             </androidx.appcompat.widget.LinearLayoutCompat>
+
             <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="현재 첨부 기사"
+                android:textSize="18dp"
+                android:textStyle="bold"></TextView>
+
+            <TextView
+                android:background="@drawable/roundborder"
+                android:backgroundTint="#C2D7FB"
+                android:layout_width="70dp"
+                android:gravity="center"
+                android:layout_height="wrap_content"
+                android:text="찬성 측"
                 android:textStyle="bold"
-                android:textSize="20dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="현재 첨부 기사">
-            </TextView>
+                android:textSize="15dp"></TextView>
             <TextView
-                android:textSize="18dp"
+                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="찬성 측">
-            </TextView>
-            <LinearLayout
-                android:id="@+id/Layout_pros"
-                android:orientation="vertical"
+                android:text="첨부된 기사가 없습니다."
+                android:layout_marginBottom="30dp"
+                android:id="@+id/pros_text"/>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/dabate_recyclerview_pros"
                 android:layout_width="match_parent"
-                android:minHeight="200dp"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:minHeight="50dp"
+                android:orientation="vertical" />
             <TextView
-                android:textSize="18dp"
+                android:background="@drawable/roundborder"
+                android:backgroundTint="#FB8888"
+                android:layout_width="70dp"
+                android:gravity="center"
+                android:layout_height="wrap_content"
+                android:text="반대 측"
+                android:textStyle="bold"
+                android:textSize="15dp"></TextView>
+
+            <TextView
+                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="반대 측">
-            </TextView>
-            <LinearLayout
-                android:id="@+id/Layout_cons"
-                android:minHeight="200dp"
-                android:orientation="vertical"
+                android:text="첨부된 기사가 없습니다."
+                android:id="@+id/cons_text"/>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/dabate_recyclerview_cons"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:minHeight="50dp"
+                android:orientation="vertical" />
         </androidx.appcompat.widget.LinearLayoutCompat>
     </ScrollView>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <Button
+            android:id="@+id/btn_pro"
+            android:layout_margin="5dp"
             android:text="찬성"
             android:textSize="25dp"
             android:textStyle="bold"
@@ -116,6 +149,8 @@
             android:layout_width="0dp"
             android:layout_height="80dp"/>
         <Button
+            android:id="@+id/btn_con"
+            android:layout_margin="5dp"
             android:text="반대"
             android:textSize="25dp"
             android:textStyle="bold"

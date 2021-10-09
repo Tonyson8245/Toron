@@ -5,18 +5,18 @@ import com.google.gson.annotations.SerializedName;
 
 public class Yesno {
     @Expose
-    @SerializedName("response") String reponse;
+    @SerializedName("response") String response;
 
-    public void setReponse(String reponse) {
-        this.reponse = reponse;
+    public void setResponse(String reponse) {
+        this.response = reponse;
     }
 
     public void setYesno(boolean yesno) {
         this.yesno = yesno;
     }
 
-    public String getReponse() {
-        return reponse;
+    public String getResponse() {
+        return response;
     }
 
     public boolean isYesno() {
@@ -24,7 +24,7 @@ public class Yesno {
     }
 
     public Yesno(String reponse, boolean yesno) {
-        this.reponse = reponse;
+        this.response = reponse;
         this.yesno = yesno;
     }
 

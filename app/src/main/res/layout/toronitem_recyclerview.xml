@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
+    android:layout_margin="10dp"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:background="@drawable/roundborder_toron"
     android:minHeight="250dp"
@@ -11,19 +12,15 @@
         android:layout_height="30dp"
         android:gravity="right"
         android:orientation="horizontal">
-        <ImageView
-            android:layout_gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_baseline_remove_red_eye_24"/>
         <TextView
-            android:layout_gravity="center"
-            android:layout_width="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:textStyle="bold"
+            android:id="@+id/Tv_room_subject"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="조회 수"
-            android:textSize="13dp"
-            android:layout_marginRight="8dp"
-            android:id="@+id/Tv_watch_num"/>
+            android:text="논제 내용"
+            android:textSize="20dp"/>
         <ImageView
             android:layout_gravity="center"
             android:layout_width="wrap_content"
@@ -33,7 +30,7 @@
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="채팅 수"
+            android:text="의견 수"
             android:layout_marginRight="8dp"
             android:textSize="13dp"
             android:id="@+id/Tv_message_num"/>
@@ -77,13 +74,10 @@
             android:layout_height="match_parent"
             android:layout_marginLeft="10dp"
             android:orientation="vertical">
+
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="논제 내용"
-                android:textSize="20dp"/>
-            <TextView
-                android:id="@+id/Tv_subject"
+                android:layout_marginVertical="10dp"
+                android:id="@+id/Tv_room_description"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -95,6 +89,7 @@
             android:backgroundTint="#A7EF68"
             android:text="참여"
             android:textSize="15dp"
+            android:id="@+id/btn_enter"
             android:background="@drawable/roundborder"
             android:layout_width="80dp"
             android:layout_height="95dp"/>
@@ -109,27 +104,20 @@
         android:layout_gravity="center"
         android:paddingHorizontal="10dp"
         android:orientation="horizontal">
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:layout_gravity="center"
             android:layout_width="30dp"
             android:layout_height="30dp"
+            android:id="@+id/Img_profile_img"
             android:src="@drawable/ic_baseline_account_circle_24"/>
-        <LinearLayout
+        <TextView
             android:layout_marginLeft="5dp"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:id="@+id/Tv_nickname"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <TextView
-                android:layout_gravity="center"
-                android:id="@+id/Tv_nickname"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="닉네임"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="[논제 발의자]"/>
-        </LinearLayout>
+            android:text="닉네임"/>
         <Space
         android:layout_weight="1"
         android:layout_width="0dp"
@@ -150,8 +138,8 @@
                     android:layout_marginRight="10dp"
                    android:text="토론 시작날짜"/>
                 <TextView
-                   android:id="@+id/Tv_Start_date"
-                   android:layout_width="wrap_content"
+                    android:id="@+id/Tv_Start_date"
+                    android:layout_width="wrap_content"
                    android:layout_height="wrap_content"
                    android:text="2021.xx.xx"/>
             </androidx.appcompat.widget.LinearLayoutCompat>

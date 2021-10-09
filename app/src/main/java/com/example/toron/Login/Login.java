@@ -133,6 +133,7 @@ public class Login extends AppCompatActivity {
     void save_userdata(JSONObject result) throws JSONException {
         editor.putString("user_nickname",result.get("user_nickname").toString());// 쉐어드에 저장
         editor.putString("user_id",result.get("user_id").toString());// 쉐어드에 저장
+        editor.putString("user_idx",result.get("user_idx").toString());// 쉐어드에 저장
         editor.putString("user_birthday",result.get("user_birthday").toString());
         editor.commit();
 

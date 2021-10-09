@@ -122,7 +122,7 @@ public class Join extends AppCompatActivity {
                             public void onResponse(Call<Yesno> call, retrofit2.Response<Yesno> response) {
                                 //성공하면 "사용가능한 아이디입니다"로 변경
                                 if (response.isSuccessful() && response.body() != null) {
-                                    if (response.body().getReponse().equals("success")) {
+                                    if (response.body().getResponse().equals("success")) {
                                         Boolean result = response.body().isYesno();
                                         if (result) {
                                             nickname_overlay = true;
@@ -160,7 +160,7 @@ public class Join extends AppCompatActivity {
                             public void onResponse(Call<Yesno> call, retrofit2.Response<Yesno> response) {
                                 //성공하면 "사용가능한 아이디입니다"로 변경
                                 if (response.isSuccessful() && response.body() != null) {
-                                    if (response.body().getReponse().equals("success")) {
+                                    if (response.body().getResponse().equals("success")) {
                                         Boolean result = response.body().isYesno();
                                         if (result) {
                                             if(Ev_id.getText().toString().trim().length()<=3) //정규식 확인 5글자

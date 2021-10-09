@@ -44,7 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="논제 입력"
-            android:textSize="20dp"/>
+            android:textSize="30dp"/>
         <EditText
             android:background="@drawable/roundborder"
             android:id="@+id/Ev_description"
@@ -53,7 +53,7 @@
             android:minHeight="150dp"
             android:layout_weight="1"
             android:hint="토론 설명 입력"
-            android:textSize="15dp"/>
+            android:textSize="20dp"/>
         <LinearLayout
             android:layout_marginTop="30dp"
 
@@ -76,51 +76,48 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
-            <Button
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="정치"
-                android:layout_margin="5dp"
-                android:background="@drawable/roundborder_toron"
-                android:backgroundTint="@color/gray_200"/>
-            <Button
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="경제"
-                android:layout_margin="5dp"
-                android:background="@drawable/roundborder_toron"
-                android:backgroundTint="@color/gray_200"/>
-            <Button
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="문화"
-                android:layout_margin="5dp"
-                android:background="@drawable/roundborder_toron"
-                android:backgroundTint="@color/gray_200"/>
-            <Button
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="사회"
-                android:layout_margin="5dp"
-                android:background="@drawable/roundborder_toron"
-                android:backgroundTint="@color/gray_200"/>
-            <Button
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="기타"
-                android:layout_margin="5dp"
-                android:background="@drawable/roundborder_toron"
-                android:backgroundTint="@color/gray_200"/>
+            <RadioGroup
+                android:id="@+id/radio_group"
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:layout_height="wrap_content">
+                <RadioButton
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/btn_politic"
+                    android:text="정치"/>
+                <RadioButton
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/btn_economy"
+                    android:text="경제"/>
+                <RadioButton
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/btn_society"
+                    android:text="사회"/>
+                <RadioButton
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/btn_overseas"
+                    android:text="국제"/>
+                <RadioButton
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/btn_etc"
+                    android:text="기타"/>
+            </RadioGroup>
         </LinearLayout>
     </LinearLayout>
     <Button
+        android:id="@+id/btn_next"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
-        android:text="다음으로"/>
+        android:text="토론 생성"/>
 </LinearLayout>

@@ -29,6 +29,7 @@ import android.widget.Toast;
 
 import com.example.toron.Adapter.NewsRecyclerAdapter;
 import com.example.toron.Adapter.ReplyRecyclerAdapter;
+import com.example.toron.Debate.Debate_make;
 import com.example.toron.R;
 import com.example.toron.Retrofit.ApiClient;
 import com.example.toron.Retrofit.Class.Detail_article;
@@ -61,7 +62,7 @@ public class News_detail extends AppCompatActivity {
     TextView Tv_news_script,Tv_news_title,Tv_datetime,Tv_reply_qty,no_reply;
     ScrollView scrollview;
     LinearLayout reply_layout,layout_reply_qty;
-    Button btn_back,btn_website,btn_insert_reply,btn_update_reply;
+    Button btn_back,btn_website,btn_insert_reply,btn_update_reply,btn_make_dabete;
     String TAG = "!!!DETAIL",sort="like",total_qty,user_id;
     InputMethodManager imm;
     private RecyclerView recyclerView;
@@ -98,6 +99,7 @@ public class News_detail extends AppCompatActivity {
         Tv_datetime = findViewById(R.id.Tv_datetime);
         btn_back = findViewById(R.id.btn_back);
         btn_website = findViewById(R.id.btn_website);
+        btn_make_dabete = findViewById(R.id.btn_make_debate);
         btn_insert_reply = findViewById(R.id.insert_reply);
         reply_layout = findViewById(R.id.reply_layout);
         scrollview = findViewById(R.id.scrollview);
@@ -136,6 +138,15 @@ public class News_detail extends AppCompatActivity {
                 set_reply();
                 Ev_reply_content.setText("");
                 imm.hideSoftInputFromWindow(Ev_reply_content.getWindowToken(), 0);
+            }
+        });
+
+        btn_make_dabete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent make_debate = new Intent(News_detail.this,Debate_make.class);
+                make_debate.putExtra("URL",href);
+                startActivity(make_debate);
             }
         });
         scrollview.setOnScrollChangeListener(new View.OnScrollChangeListener() {
