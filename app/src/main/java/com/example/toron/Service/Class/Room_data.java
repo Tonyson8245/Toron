@@ -8,6 +8,30 @@ import java.util.ArrayList;
 public class Room_data implements Parcelable {
     String room_idx;
 
+    protected Room_data(Parcel in) {
+        room_idx = in.readString();
+        user_maker = in.readString();
+        start_date = in.readString();
+        room_subject = in.readString();
+        room_description = in.readString();
+        chat_qty = in.readString();
+        member_qty = in.readString();
+        category = in.readString();
+        status = in.readString();
+    }
+
+    public static final Creator<Room_data> CREATOR = new Creator<Room_data>() {
+        @Override
+        public Room_data createFromParcel(Parcel in) {
+            return new Room_data(in);
+        }
+
+        @Override
+        public Room_data[] newArray(int size) {
+            return new Room_data[size];
+        }
+    };
+
     public String getRoom_idx() {
         return room_idx;
     }
@@ -141,6 +165,14 @@ public class Room_data implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-
+        dest.writeString(room_idx);
+        dest.writeString(user_maker);
+        dest.writeString(start_date);
+        dest.writeString(room_subject);
+        dest.writeString(room_description);
+        dest.writeString(chat_qty);
+        dest.writeString(member_qty);
+        dest.writeString(category);
+        dest.writeString(status);
     }
 }

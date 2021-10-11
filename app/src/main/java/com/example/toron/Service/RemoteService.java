@@ -1,8 +1,14 @@
 package com.example.toron.Service;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -13,11 +19,15 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
+import com.example.toron.R;
 import com.example.toron.Service.Class.Chat;
 import com.example.toron.Service.Class.Request;
 import com.example.toron.Service.Class.Response;
 import com.example.toron.Service.Class.Room_data;
+import com.example.toron.Service.Class.Status_Foreground;
 import com.example.toron.Service.Class.System_data;
 import com.example.toron.Service.Socket.ConnectionThread;
 import com.example.toron.Service.Socket.SendToServerThread;
@@ -27,6 +37,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.DataInputStream;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.net.Socket;
@@ -49,8 +60,9 @@ public class RemoteService extends Service {
     public static final int MSG_GET_CHAT_LIST = 6;
     public static final int MSG_SEND_MSG = 7;
     public static final int MSG_GET_CHAT = 8;
+    public static final int MSG_CHECK_ACTIVITY = 9;
     String user_idx;
-
+    NotificationChannel notificationChannel_chat;
 
     private ArrayList<Messenger> mClientCallbacks = new ArrayList<Messenger>();
     // 서비스에 연결된 액티비티(Messenger) 리스트
@@ -74,6 +86,7 @@ public class RemoteService extends Service {
         sharedPreferences = getApplication().getSharedPreferences("user_data",0);
         user_idx = sharedPreferences.getString("user_idx",null);
         start_connect(user_idx);
+        createNotificationChannel("DEFAULT", "default channel", NotificationManager.IMPORTANCE_HIGH);
     }
 
     @Override
@@ -123,6 +136,9 @@ public class RemoteService extends Service {
                     break;
                 case MSG_SEND_MSG:
                     request_send_msg(msg);
+                    break;
+                case MSG_CHECK_ACTIVITY:
+                    create_notify(msg);
                     break;
             }
         }
@@ -204,6 +220,37 @@ public class RemoteService extends Service {
                 mClientCallbacks.remove( i );
             }
         }
+        Log.d("mClient",String.valueOf(mClientCallbacks.size()));
+
+        if(mClientCallbacks.size()>0) {
+            for (int i = mClientCallbacks.size() - 1; i >= 0; i--) {
+                try {
+                    Log.d(TAG, "Send MSG_CHECK_ACTIVITY message to client");
+                    Message msg = Message.obtain(
+                            null, RemoteService.MSG_CHECK_ACTIVITY);
+                    msg.obj = bundle;
+                    mClientCallbacks.get(i).send(msg);
+                } catch (RemoteException e) {
+                    mClientCallbacks.remove(i);
+                }
+            }
+        }
+        else {
+            Chat chat = gson.fromJson(data,Chat.class);
+            createNotification("DEFAULT", 1, "TORON",chat.getNickname(), chat.getMsg());
+        }
+    } // 채팅 하나 가져오기
+
+    public void create_notify(Message msg){
+        Bundle bundle = (Bundle) msg.obj;
+
+        if(!bundle.getString("name").equals("room")){ // name 이 방인 경우
+            Chat chat = gson.fromJson(bundle.getString("chat"),Chat.class);
+
+            if(!bundle.getString("room_idx").equals(chat.getRoom_idx())){ // 방번호가 채팅 번호랑 같을 경우
+                createNotification("DEFAULT", 1, "TORON",chat.getNickname(), chat.getMsg());
+            }
+        }
     }
 
     public void request_chat_list(Integer room_idx){
@@ -219,15 +266,42 @@ public class RemoteService extends Service {
         String msg = bundle.getString("msg");
         String room_idx = bundle.getString("room_idx");
         String user_idx = bundle.getString("user_idx");
+        String datetime = bundle.getString("datetime");
         String side = bundle.getString("side");
 
-        Chat chat = new Chat(room_idx,msg,user_idx,null,side,"");
+        Chat chat = new Chat(room_idx,msg,user_idx,datetime,side,"");
         Request request = new Request("CHAT",gson.toJson(chat));
         SendToServerThread sendToServerThread = new SendToServerThread(socket,gson.toJson(request));
         sendToServerThread.start();
         Log.d(TAG,"request_send_msg");
     }
 
+    void createNotification(String channelId, int id, String title,String nickname, String text){
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)          // Head Up Display를 위해 PRIORITY_HIGH 설정
+                .setSmallIcon(R.drawable.ic_launcher_foreground)        // 알림시 보여지는 아이콘. 반드시 필요
+                .setContentTitle(title)
+                .setContentText(nickname + ": " + text)
+                //.setTimeoutAfter(1000)    // 지정한 시간 이후 알림 삭제
+                //.setStyle(new NotificationCompat.BigTextStyle().bigText(text))          // 한줄 이상의 텍스트를 모두 보여주고 싶을때 사용
+                .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);  // 알림시 효과음, 진동 여부
+
+        NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(id, builder.build());
+    }
+
+    void createNotificationChannel(String channelId, String channelName, int importance){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+            notificationManager.createNotificationChannel(new NotificationChannel(channelId, channelName, importance));
+        }
+    }
+
+    void destroyNotification(int id){
+        NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.cancel(id);
+    }
 
 
     class MessageThread extends Thread {
@@ -243,6 +317,7 @@ public class RemoteService extends Service {
                 this.socket = socket; // socket 생성
                 InputStream is = socket.getInputStream();
                 dis = new DataInputStream(is);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -250,10 +325,14 @@ public class RemoteService extends Service {
 
         @Override
         public void run() {
+            int length;
             while (isRunning) {
                 try {
                     // 서버로부터 데이터를 수신받는다.
-                    msg = dis.readUTF();
+                    length = dis.readInt();
+                    byte[] data=new byte[length];
+                    dis.readFully(data);
+                    String msg=new String(data,"UTF-8");
                     Log.d("CHECK",msg);
                     receive_msg(msg);
                     // 화면에 출력
@@ -276,7 +355,6 @@ public class RemoteService extends Service {
 
         public void receive_msg(String msg){
             Response response;
-            msg = messageThread.getMsg();
             if(msg!=null){
                 Log.d(TAG,"response " + msg);
                 response = gson.fromJson(msg,Response.class);

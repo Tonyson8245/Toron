@@ -39,7 +39,7 @@ public class Debate_SelectSide extends AppCompatActivity {
     private AttachArticleRecyclerAdapter consAdapter;
     private AttachArticleRecyclerAdapter prosAdapter;
     TextView Tv_subject,Tv_description,Tv_cons_text,Tv_pros_text;
-    String room_idx;
+    String room_idx,side;
     Button btn_con,btn_pro;
     String TAG = "Debate_SelectSide";
     ArrayList<New_article> cons = new ArrayList<>(); // 반대
@@ -137,6 +137,8 @@ public class Debate_SelectSide extends AppCompatActivity {
                 enter_room.putExtra("room_subject",Tv_subject.getText());
                 enter_room.putExtra("room_description",Tv_description.getText());
                 enter_room.putExtra("room_idx",room_idx);
+                enter_room.putExtra("side",side);
+
                 startActivity(enter_room);
                 finish();
             }

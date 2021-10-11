@@ -37,5 +37,13 @@
             android:maxWidth="250dp"
             android:background="@drawable/other"/>
     </androidx.appcompat.widget.LinearLayoutCompat>
-
+    <TextView
+        android:layout_marginLeft="5dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="2dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/Tv_datetime"
+        android:textSize="10dp"
+        android:text="시간"/>
 </androidx.appcompat.widget.LinearLayoutCompat>

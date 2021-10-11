@@ -5,7 +5,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -24,13 +23,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.toron.Adapter.NewsRecyclerAdapter;
 import com.example.toron.Adapter.RoomRecyclerAdapter;
 import com.example.toron.Debate.Debate_make;
-import com.example.toron.Mypage.Profile_setting;
 import com.example.toron.R;
-import com.example.toron.Retrofit.Class.New_article;
-import com.example.toron.Service.Class.Room;
 import com.example.toron.Service.Class.Room_data;
 import com.example.toron.Service.RemoteService;
 import com.google.gson.Gson;
@@ -85,8 +80,7 @@ public class Devate_fragment extends Fragment {
             }
         });
 
-        Intent intent = new Intent(Devate_Activity.getApplicationContext(), RemoteService.class); // 바인드를 위한 intent
-        Devate_Activity.bindService(intent, mConnection, Context.BIND_AUTO_CREATE); // 여기서 액티비티와 서비스를 바인드 ㅎ해줌
+
         recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -108,11 +102,21 @@ public class Devate_fragment extends Fragment {
 
 
 
+
     @Override
     public void onResume() {
         super.onResume();
+        Log.d("mClient", "onResume:Debate_fragement");
+//        Intent intent = new Intent(Devate_Activity.getApplicationContext(), RemoteService.class);
+//        Devate_Activity.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
+        Intent intent = new Intent(getActivity(), RemoteService.class);// 바인드를 위한 intent
+        getActivity().bindService(intent, mConnection, Context.BIND_AUTO_CREATE); // 여기서 액티비티와 서비스를 바인드 ㅎ해줌
+
         get_roomList(); //  방 불러오기 서비스에 요청
     }
+
+
 
     @Override
     public void onAttach(@NonNull @NotNull Context context) {
@@ -124,6 +128,12 @@ public class Devate_fragment extends Fragment {
         }
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d("mClient", "onPause:Debate_fragment");
+        getActivity().unbindService(mConnection);
+    }
 
     private ServiceConnection mConnection = new ServiceConnection()
     {
@@ -168,7 +178,26 @@ public class Devate_fragment extends Fragment {
                     roomRecyclerAdapter.set_RoomList(list);
                     roomRecyclerAdapter.notifyDataSetChanged();
                     break;
+                case RemoteService.MSG_CHECK_ACTIVITY:
+                    sendBackName();
+                    break;
             }
+        }
+    }
+    private void sendBackName(){
+        Bundle bundle = new Bundle();
+        bundle.putString("name","Debate_fragment");
+        if (mServiceCallback != null) {
+            // request 'add value' to service
+            Message msg = Message.obtain(
+                    null, RemoteService.MSG_CHECK_ACTIVITY);
+            msg.obj = bundle;
+            try {
+                mServiceCallback.send(msg);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+            Log.d(TAG, "Send MSG_CHECK_ACTIVITY message to Service");
         }
     }
 

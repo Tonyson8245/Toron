@@ -27,12 +27,16 @@ import com.example.toron.Fragment.Devate_fragment;
 import com.example.toron.R;
 import com.example.toron.Service.Class.Chat;
 import com.example.toron.Service.Class.Room_data;
+import com.example.toron.Service.Class.Status_Foreground;
 import com.example.toron.Service.RemoteService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static java.time.LocalDateTime.now;
@@ -51,7 +55,10 @@ public class Debate_room extends AppCompatActivity {
     TextView Tv_subject,Tv_description;
     EditText Ev_message_content;
     Button btn_send,btn_back;
-    String TAG = "Debate_room",room_idx,side="pro";
+    String TAG = "Debate_room",room_idx,side;
+    Date time = new Date();
+    SimpleDateFormat format1 = new SimpleDateFormat ( "yyyy-MM-dd HH:mm:ss");
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,8 +66,7 @@ public class Debate_room extends AppCompatActivity {
         setContentView(R.layout.activity_debate_room);
 
         Intent getData = getIntent();
-
-//        side = getData.getStringExtra("side");
+        side = getData.getStringExtra("side");
 
         Tv_subject = findViewById(R.id.Tv_subject);
         Tv_description = findViewById(R.id.Tv_description);
@@ -73,13 +79,10 @@ public class Debate_room extends AppCompatActivity {
 
         chat_RecyclerView = findViewById(R.id.dabate_recyclerview);
         chat_RecyclerView.setHasFixedSize(true);
-        chatAdapter = new ChatAdapter(chat_list,this);
+        chatAdapter = new ChatAdapter(chat_list, this);
         chat_RecyclerView.setLayoutManager(new LinearLayoutManager(this));
         chat_RecyclerView.setAdapter(chatAdapter);
         // 채팅 리사이클러뷰 세팅
-
-        Intent intent = new Intent(this, RemoteService.class); // 바인드를 위한 intent
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE); // 여기서 액티비티와 서비스를 바인드 해줌
 
         btn_back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,9 +100,6 @@ public class Debate_room extends AppCompatActivity {
         });
     }
 
-    void toast(){
-        Toast.makeText(this,"WKs",Toast.LENGTH_SHORT).show();
-    }
     private ServiceConnection mConnection = new ServiceConnection(){
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) { //해당 서비스의 IBinder 라는 객체 생성
@@ -129,9 +129,20 @@ public class Debate_room extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG,"onResume");
+        Log.d("mClient","onResume:Debate_room");
+        Intent intent = new Intent(this, RemoteService.class); // 바인드를 위한 intent
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE); // 여기서 액티비티와 서비스를 바인드 해줌
+
         request_chat_list(Integer.valueOf(room_idx));
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d("mClient", "onPause:Debate_room");
+        unbindService(mConnection);
+    }
+
 
     private class CallbackHandler extends Handler  {
         Gson gson = new Gson();
@@ -153,7 +164,7 @@ public class Debate_room extends AppCompatActivity {
                     Bundle bundle2 = (Bundle) msg.obj;;
                     String temp_msg = bundle2.getString("chat");
 
-                    Log.d(TAG,bundle2.getString("chat"));
+                    Log.d(TAG,"Chat" + bundle2.getString("chat"));
                     Chat chat = gson.fromJson(temp_msg,Chat.class);
                     if(chat.getRoom_idx().equals(room_idx)) {
                         chat_list.add(new Chat(chat.getRoom_idx(), chat.getMsg(), chat.getUser_idx(), chat.getDatetime(), chat.getSide(), chat.getNickname()));
@@ -161,7 +172,31 @@ public class Debate_room extends AppCompatActivity {
                         toBottom();
                     }
                     break;
+                case RemoteService.MSG_CHECK_ACTIVITY:
+                    sendBackName(msg);
+                    break;
             }
+        }
+    }
+    private void sendBackName(Message message){
+        Bundle data = (Bundle) message.obj;
+
+        Bundle bundle = new Bundle();
+        bundle.putString("name","room");
+        bundle.putString("room_idx",room_idx);
+        bundle.putString("chat",data.getString("chat"));
+
+        if (mServiceCallback != null) {
+            // request 'add value' to service
+            Message msg = Message.obtain(
+                    null, RemoteService.MSG_CHECK_ACTIVITY);
+            msg.obj = bundle;
+            try {
+                mServiceCallback.send(msg);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+            Log.d(TAG, "Send MSG_CHECK_ACTIVITY message to Service");
         }
     }
 
@@ -195,7 +230,11 @@ public class Debate_room extends AppCompatActivity {
         sharedPreferences = this.getSharedPreferences("user_data",0);
         String user_idx = sharedPreferences.getString("user_idx",null);
         String user_nickname = sharedPreferences.getString("user_nickname",null);
-        chat_list.add(new Chat(room_idx,msg,user_idx,"",side,user_nickname));
+
+        String time_data = format1.format(time);
+        Log.d(TAG,"time" + time_data);
+
+        chat_list.add(new Chat(room_idx,msg,user_idx,time_data,side,user_nickname));
         chatAdapter.notifyItemChanged(chat_list.size()-1);
         //클라에 추가
 
@@ -203,6 +242,7 @@ public class Debate_room extends AppCompatActivity {
         bundle.putString("msg",msg);
         bundle.putString("room_idx",room_idx);
         bundle.putString("user_idx",user_idx);
+        bundle.putString("datetime",time_data);
         bundle.putString("side",side);
 
         if (mServiceCallback != null) {

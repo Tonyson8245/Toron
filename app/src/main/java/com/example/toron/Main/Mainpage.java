@@ -60,9 +60,24 @@ public class Mainpage extends AppCompatActivity {
 
 
         Log.d(TAG, "Trying to connect to service");
-        Intent intent = new Intent(getApplicationContext(), RemoteService.class); // 바인드를 위한 intent
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE); // 여기서 액티비티와 서비스를 바인드 ㅎ해줌
+
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("mClient","onResume:Mainpage");
+//        Intent intent = new Intent(getApplicationContext(), RemoteService.class); // 바인드를 위한 intent
+//        bindService(intent, mConnection, Context.BIND_AUTO_CREATE); // 여기서 액티비티와 서비스를 바인드 ㅎ해줌
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+//        unbindService(mConnection);
+        Log.d("mClient","onPause:Mainpage");
+    }
+
     private void BottomNavigate(int id) {  //BottomNavigation 페이지 변경
         String tag = String.valueOf(id);
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -145,11 +160,12 @@ public class Mainpage extends AppCompatActivity {
     }  // 변화가 있을때 사용될 핸들러
 
     public void enter_room(String room_idx,String room_status,String room_subject,String room_description) {
-        if(room_status.equals("1")){
+        if(room_status!=null){
             Intent room = new Intent(this, Debate_room.class);
             room.putExtra("room_subject",room_subject);
             room.putExtra("room_description",room_description);
             room.putExtra("room_idx",room_idx);
+            room.putExtra("side",room_status);
             startActivity(room);
         }// 이미 참석
         else{

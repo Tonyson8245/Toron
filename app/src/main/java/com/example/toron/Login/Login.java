@@ -138,7 +138,7 @@ public class Login extends AppCompatActivity {
         editor.commit();
 
 
-        String url = "http://49.247.195.99/storage/profile_img/"+result.get("user_id")+".jpg";
+        String url = "http://49.247.195.99/storage/profile_img/"+result.get("user_idx")+".jpg";
         ImageLoadTask task = new ImageLoadTask(url,"profile_img");
         task.execute();
         Handler mHandler = new Handler();
