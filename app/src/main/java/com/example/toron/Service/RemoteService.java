@@ -35,6 +35,8 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.DataInputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -138,7 +140,7 @@ public class RemoteService extends Service {
                     request_send_msg(msg);
                     break;
                 case MSG_CHECK_ACTIVITY:
-                    create_notify(msg);
+                    get_chat(msg);
                     break;
             }
         }
@@ -204,30 +206,21 @@ public class RemoteService extends Service {
         }
     }
 
-    public void get_chat(String data){
-        Bundle bundle = new Bundle();
-        bundle.putString("chat",data);
+    public void get_chat(Message message){
+        Bundle data = (Bundle) message.obj;
 
-        for (int i = mClientCallbacks.size() - 1; i >= 0; i--) {
-            try{
-                Log.d(TAG, "Send MSG_GET_CHAT message to client");
-                Message msg = Message.obtain(
-                        null, RemoteService.MSG_GET_CHAT);
-                msg.obj = bundle;
-                mClientCallbacks.get(i).send(msg);
-            }
-            catch( RemoteException e){
-                mClientCallbacks.remove( i );
-            }
-        }
-        Log.d("mClient",String.valueOf(mClientCallbacks.size()));
+        Bundle bundle =  new Bundle();
+        bundle.putString("chat",data.getString("chat"));
+        Chat chat = gson.fromJson(data.getString("chat"),Chat.class);
 
-        if(mClientCallbacks.size()>0) {
+        Log.d(TAG,"status " + data.getString("name") + " size:" + mClientCallbacks.size());
+
+        if(data.getString("name").equals("room") && data.getString("room_idx").equals(chat.getRoom_idx())){
             for (int i = mClientCallbacks.size() - 1; i >= 0; i--) {
                 try {
-                    Log.d(TAG, "Send MSG_CHECK_ACTIVITY message to client");
+                    Log.d(TAG, "Send MSG_GET_CHAT message to client");
                     Message msg = Message.obtain(
-                            null, RemoteService.MSG_CHECK_ACTIVITY);
+                            null, RemoteService.MSG_GET_CHAT);
                     msg.obj = bundle;
                     mClientCallbacks.get(i).send(msg);
                 } catch (RemoteException e) {
@@ -235,22 +228,34 @@ public class RemoteService extends Service {
                 }
             }
         }
+        else{
+            create_notify(chat);
+        }
+    } // 액티비티로 채팅 보내주기 ,  노티 아니면 문자 추가
+
+    public void choice_notify(String data){
+        Bundle bundle = new Bundle();
+        bundle.putString("chat",data);
+
+        if(mClientCallbacks.size()>0 && mClientCallbacks.get(0)!=null) {
+            try {
+                Log.d(TAG, "Send MSG_CHECK_ACTIVITY message to client");
+                Message msg = Message.obtain(
+                        null, RemoteService.MSG_CHECK_ACTIVITY);
+                msg.obj = bundle;
+                mClientCallbacks.get(0).send(msg);
+            } catch (RemoteException e) {
+                mClientCallbacks.remove(0);
+            }
+        }
         else {
             Chat chat = gson.fromJson(data,Chat.class);
             createNotification("DEFAULT", 1, "TORON",chat.getNickname(), chat.getMsg());
         }
-    } // 채팅 하나 가져오기
+    }
 
-    public void create_notify(Message msg){
-        Bundle bundle = (Bundle) msg.obj;
-
-        if(!bundle.getString("name").equals("room")){ // name 이 방인 경우
-            Chat chat = gson.fromJson(bundle.getString("chat"),Chat.class);
-
-            if(!bundle.getString("room_idx").equals(chat.getRoom_idx())){ // 방번호가 채팅 번호랑 같을 경우
-                createNotification("DEFAULT", 1, "TORON",chat.getNickname(), chat.getMsg());
-            }
-        }
+    public void create_notify(Chat chat){
+        createNotification("DEFAULT", 1, "TORON",chat.getNickname(), chat.getMsg());
     }
 
     public void request_chat_list(Integer room_idx){
@@ -366,7 +371,7 @@ public class RemoteService extends Service {
                         get_chat_list(response.getData());
                         break;
                     case "chat":
-                        get_chat(response.getData());
+                        choice_notify(response.getData());
                     default:
                         break;
                 }

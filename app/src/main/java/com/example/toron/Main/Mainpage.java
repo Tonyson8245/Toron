@@ -67,14 +67,14 @@ public class Mainpage extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.d("mClient","onResume:Mainpage");
-//        Intent intent = new Intent(getApplicationContext(), RemoteService.class); // 바인드를 위한 intent
-//        bindService(intent, mConnection, Context.BIND_AUTO_CREATE); // 여기서 액티비티와 서비스를 바인드 ㅎ해줌
+        Intent intent = new Intent(getApplicationContext(), RemoteService.class); // 바인드를 위한 intent
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE); // 여기서 액티비티와 서비스를 바인드 ㅎ해줌
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-//        unbindService(mConnection);
+        unbindService(mConnection);
         Log.d("mClient","onPause:Mainpage");
     }
 
@@ -110,8 +110,6 @@ public class Mainpage extends AppCompatActivity {
         fragmentTransaction.setPrimaryNavigationFragment(fragment);
         fragmentTransaction.setReorderingAllowed(true);
         fragmentTransaction.commitNow();
-
-
     }
 
     public void click_news_detail(String href,String title,String img,String writing,String datetime,String news_idx) {
@@ -155,9 +153,32 @@ public class Mainpage extends AppCompatActivity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
 
+                case RemoteService.MSG_CHECK_ACTIVITY:
+                    sendBackName(msg);
+                    break;
             }
         }
-    }  // 변화가 있을때 사용될 핸들러
+    }
+    private void sendBackName(Message message){
+        Bundle data = (Bundle) message.obj;
+
+        Bundle bundle = new Bundle();
+        bundle.putString("name","Mainpage");
+        bundle.putString("chat",data.getString("chat"));
+
+        if (mServiceCallback != null) {
+            // request 'add value' to service
+            Message msg = Message.obtain(
+                    null, RemoteService.MSG_CHECK_ACTIVITY);
+            msg.obj = bundle;
+            try {
+                mServiceCallback.send(msg);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+            Log.d(TAG, "Send MSG_CHECK_ACTIVITY message to Service " + bundle.getString("name"));
+        }
+    }
 
     public void enter_room(String room_idx,String room_status,String room_subject,String room_description) {
         if(room_status!=null){

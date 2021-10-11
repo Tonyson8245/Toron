@@ -109,7 +109,7 @@ public class Devate_fragment extends Fragment {
         Log.d("mClient", "onResume:Debate_fragement");
 //        Intent intent = new Intent(Devate_Activity.getApplicationContext(), RemoteService.class);
 //        Devate_Activity.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-
+//
         Intent intent = new Intent(getActivity(), RemoteService.class);// 바인드를 위한 intent
         getActivity().bindService(intent, mConnection, Context.BIND_AUTO_CREATE); // 여기서 액티비티와 서비스를 바인드 ㅎ해줌
 
@@ -179,14 +179,18 @@ public class Devate_fragment extends Fragment {
                     roomRecyclerAdapter.notifyDataSetChanged();
                     break;
                 case RemoteService.MSG_CHECK_ACTIVITY:
-                    sendBackName();
+//                    sendBackName(msg);
                     break;
             }
         }
     }
-    private void sendBackName(){
+    private void sendBackName(Message message){
+        Bundle data = (Bundle) message.obj;
+
         Bundle bundle = new Bundle();
-        bundle.putString("name","Debate_fragment");
+        bundle.putString("name","Devate_fragment");
+        bundle.putString("chat",data.getString("chat"));
+
         if (mServiceCallback != null) {
             // request 'add value' to service
             Message msg = Message.obtain(
@@ -197,9 +201,11 @@ public class Devate_fragment extends Fragment {
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-            Log.d(TAG, "Send MSG_CHECK_ACTIVITY message to Service");
+            Log.d(TAG, "Send MSG_CHECK_ACTIVITY message to Service " + bundle.getString("name"));
+
         }
     }
+
 
 
     private void get_roomList(){

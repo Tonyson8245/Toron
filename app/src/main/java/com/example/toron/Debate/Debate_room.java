@@ -196,7 +196,8 @@ public class Debate_room extends AppCompatActivity {
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-            Log.d(TAG, "Send MSG_CHECK_ACTIVITY message to Service");
+            Log.d(TAG, "Send MSG_CHECK_ACTIVITY message to Service " + bundle.getString("name"));
+
         }
     }
 
