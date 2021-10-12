@@ -1,6 +1,7 @@
 package com.example.toron.Debate;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,6 +20,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,10 +53,10 @@ public class Debate_room extends AppCompatActivity {
     // 액티비티 <-> 서비스 : 서비스에서 액티비티로 결과를 리턴을 받을 때 쓰임 ; HTTP 통신과 유사한 개념
 
     ArrayList<Chat> chat_list = new ArrayList<>();
-
-    TextView Tv_subject,Tv_description;
+    LinearLayout tag_layout;
+    TextView Tv_subject,Tv_description,Tv_tag_nickname,Tv_tag_content;
     EditText Ev_message_content;
-    Button btn_send,btn_back;
+    Button btn_send,btn_back,btn_tag_close;
     String TAG = "Debate_room",room_idx,side;
     Date time = new Date();
     SimpleDateFormat format1 = new SimpleDateFormat ( "yyyy-MM-dd HH:mm:ss");
@@ -69,10 +71,15 @@ public class Debate_room extends AppCompatActivity {
         side = getData.getStringExtra("side");
 
         Tv_subject = findViewById(R.id.Tv_subject);
+        Tv_tag_content = findViewById(R.id.Tv_tag_content);
+        Tv_tag_nickname = findViewById(R.id.Tv_tag_nickname);
         Tv_description = findViewById(R.id.Tv_description);
         btn_send = findViewById(R.id.insert_message);
         Ev_message_content = findViewById(R.id.Ev_message_content);
         btn_back = findViewById(R.id.btn_back);
+        tag_layout = findViewById(R.id.tag_layout);
+        btn_tag_close = findViewById(R.id.btn_tag_close);
+
         Tv_subject.setText(getData.getStringExtra("room_subject"));
         Tv_description.setText(getData.getStringExtra("room_description"));
         room_idx = getData.getStringExtra("room_idx");
@@ -96,6 +103,12 @@ public class Debate_room extends AppCompatActivity {
             public void onClick(View v) {
                 send_msg(Ev_message_content.getText().toString());
                 Ev_message_content.setText("");
+            }
+        });
+        btn_tag_close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tag_layout.setVisibility(View.GONE);
             }
         });
     }
@@ -258,5 +271,14 @@ public class Debate_room extends AppCompatActivity {
             }
         }
         toBottom();
+    }
+
+    public void set_TagMode(String chat_idx,String nickname, String msg){
+        tag_layout.setVisibility(View.VISIBLE);
+
+        Tv_tag_nickname.setText(nickname);
+        Tv_tag_content.setText(": "+msg);
+
+        Log.d(TAG,chat_idx + " " + nickname + " " + msg);
     }
 }

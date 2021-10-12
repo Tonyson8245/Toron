@@ -66,7 +66,7 @@ public class RemoteService extends Service {
     String user_idx;
     NotificationChannel notificationChannel_chat;
 
-    private ArrayList<Messenger> mClientCallbacks = new ArrayList<Messenger>();
+    private Messenger mClientCallbacks = new Messenger(new CallbackHandler());
     // 서비스에 연결된 액티비티(Messenger) 리스트
     // 서비스 -> 액티비티: 이벤트 전달 할 때 해당 Messenger 에 이벤트 전달
     final Messenger mMessenger = new Messenger(new CallbackHandler());
@@ -108,27 +108,26 @@ public class RemoteService extends Service {
             switch( msg.what ){
                 case MSG_CLIENT_CONNECT:
                     Log.d(TAG, "Received MSG_CLIENT_CONNECT message from client");
-                    mClientCallbacks.add(msg.replyTo);
+                    mClientCallbacks = msg.replyTo;
                     break;
                 case MSG_CLIENT_DISCONNECT:
                     Log.d(TAG, "Received MSG_CLIENT_DISCONNECT message from client");
-                    mClientCallbacks.remove(msg.replyTo);
+                    mClientCallbacks = null;
                     break;
                 case MSG_ADD_VALUE:
                     Log.d(TAG, "Received message from client: MSG_ADD_VALUE");
                     mValue += msg.arg1;
-                    for (int i = mClientCallbacks.size() - 1; i >= 0; i--) {
+//                    for (int i = mClientCallbacks.size() - 1; i >= 0; i--) {
                         try{
                             Log.d(TAG, "Send MSG_ADDED_VALUE message to client");
                             Message added_msg = Message.obtain(
                                     null, RemoteService.MSG_ADDED_VALUE);
                             added_msg.arg1 = mValue;
-                            mClientCallbacks.get(i).send(added_msg);
+                            mClientCallbacks.send(added_msg);
                         }
                         catch( RemoteException e){
-                            mClientCallbacks.remove( i );
+                            mClientCallbacks = null;
                         }
-                    }
                     break;
                 case MSG_SHOW_ROOM_LIST:
                     request_show_roomList();
@@ -174,17 +173,15 @@ public class RemoteService extends Service {
         Bundle bundle = new Bundle();
         bundle.putString("list",data);
 
-        for (int i = mClientCallbacks.size() - 1; i >= 0; i--) {
-            try{
-                Log.d(TAG, "Send MSG_SHOW_ROOM_LIST message to client");
-                Message msg = Message.obtain(
-                        null, RemoteService.MSG_SHOW_ROOM_LIST);
-                msg.obj = bundle;
-                mClientCallbacks.get(i).send(msg);
-            }
-            catch( RemoteException e){
-                mClientCallbacks.remove( i );
-            }
+        try{
+            Log.d(TAG, "Send MSG_SHOW_ROOM_LIST message to client");
+            Message msg = Message.obtain(
+                    null, RemoteService.MSG_SHOW_ROOM_LIST);
+            msg.obj = bundle;
+            mClientCallbacks.send(msg);
+        }
+        catch( RemoteException e){
+            mClientCallbacks  = null;
         }
     } // 방 정보 가져온거 액티비티로 보내기
 
@@ -192,17 +189,15 @@ public class RemoteService extends Service {
         Bundle bundle = new Bundle();
         bundle.putString("list",data);
 
-        for (int i = mClientCallbacks.size() - 1; i >= 0; i--) {
-            try{
-                Log.d(TAG, "Send MSG_GET_CHAT_LIST message to client");
-                Message msg = Message.obtain(
-                        null, RemoteService.MSG_GET_CHAT_LIST);
-                msg.obj = bundle;
-                mClientCallbacks.get(i).send(msg);
-            }
-            catch( RemoteException e){
-                mClientCallbacks.remove( i );
-            }
+        try{
+            Log.d(TAG, "Send MSG_GET_CHAT_LIST message to client");
+            Message msg = Message.obtain(
+                    null, RemoteService.MSG_GET_CHAT_LIST);
+            msg.obj = bundle;
+            mClientCallbacks.send(msg);
+        }
+        catch( RemoteException e){
+            mClientCallbacks = null;
         }
     }
 
@@ -213,19 +208,17 @@ public class RemoteService extends Service {
         bundle.putString("chat",data.getString("chat"));
         Chat chat = gson.fromJson(data.getString("chat"),Chat.class);
 
-        Log.d(TAG,"status " + data.getString("name") + " size:" + mClientCallbacks.size());
+        Log.d(TAG,"status " + data.getString("name") + " size:" + mClientCallbacks.toString());
 
         if(data.getString("name").equals("room") && data.getString("room_idx").equals(chat.getRoom_idx())){
-            for (int i = mClientCallbacks.size() - 1; i >= 0; i--) {
-                try {
-                    Log.d(TAG, "Send MSG_GET_CHAT message to client");
-                    Message msg = Message.obtain(
-                            null, RemoteService.MSG_GET_CHAT);
-                    msg.obj = bundle;
-                    mClientCallbacks.get(i).send(msg);
-                } catch (RemoteException e) {
-                    mClientCallbacks.remove(i);
-                }
+            try {
+                Log.d(TAG, "Send MSG_GET_CHAT message to client");
+                Message msg = Message.obtain(
+                        null, RemoteService.MSG_GET_CHAT);
+                msg.obj = bundle;
+                mClientCallbacks.send(msg);
+            } catch (RemoteException e) {
+                mClientCallbacks= null;
             }
         }
         else{
@@ -237,15 +230,15 @@ public class RemoteService extends Service {
         Bundle bundle = new Bundle();
         bundle.putString("chat",data);
 
-        if(mClientCallbacks.size()>0 && mClientCallbacks.get(0)!=null) {
+        if(mClientCallbacks!=null) {
             try {
                 Log.d(TAG, "Send MSG_CHECK_ACTIVITY message to client");
                 Message msg = Message.obtain(
                         null, RemoteService.MSG_CHECK_ACTIVITY);
                 msg.obj = bundle;
-                mClientCallbacks.get(0).send(msg);
+                mClientCallbacks.send(msg);
             } catch (RemoteException e) {
-                mClientCallbacks.remove(0);
+                mClientCallbacks=null;
             }
         }
         else {

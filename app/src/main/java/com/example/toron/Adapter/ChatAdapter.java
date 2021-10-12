@@ -12,9 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.toron.Debate.Debate_room;
 import com.example.toron.R;
 import com.example.toron.Service.Class.Chat;
 import com.example.toron.Service.Class.Room_data;
@@ -32,6 +34,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public static final int VIEW_TYPE_A = 1;
     public static final int VIEW_TYPE_B = 2;
     Context context;
+    Debate_room debate_room;
     String nickname,user_idx,TAG = " chatAdapter";
     private ArrayList<Chat> list = new ArrayList<>();
 
@@ -40,6 +43,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         sharedPreferences = context.getSharedPreferences("user_data",0);
         user_idx = sharedPreferences.getString("user_idx",null);
         this.context = context;
+        this.debate_room = (Debate_room) context;
         this.list = list;
     }
 
@@ -84,7 +88,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         String datetime = dateFormatter.format(date);
 
 
-        if (holder instanceof AHolder) {
+        if (holder instanceof AHolder) { //A가 남이다.
             ((AHolder) holder).content.setText(msg);
 
             if (side.equals("con")) ((AHolder) holder).content.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FDD7D7"))); //반대
@@ -99,6 +103,21 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     .load(imageStr)
                     .error(R.drawable.ic_baseline_account_circle_24)
                     .into(((AHolder) holder).profile);
+
+            ((AHolder) holder).content.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    debate_room.set_TagMode("chat_idx",nickname,msg);
+                }
+            }); // 태그의 경우 한번 클릭
+
+            ((AHolder) holder).content.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    Toast.makeText(debate_room,"long click",Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+            }); // 신고, 좋아요의 경우 Long button
 
         } else {
             ((BHolder) holder).content.setText(msg);
@@ -148,7 +167,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             nickname = (TextView) view.findViewById(R.id.Tv_user_name);
             datetime = (TextView) view.findViewById(R.id.Tv_datetime);
             profile = (ImageView) view.findViewById(R.id.Img_userprofile);
-
         }
     }
 
@@ -168,5 +186,4 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             profile = (ImageView) view.findViewById(R.id.Img_userprofile);
         }
     }
-
 }
