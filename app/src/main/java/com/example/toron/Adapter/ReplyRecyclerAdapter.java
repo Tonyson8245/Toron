@@ -35,7 +35,7 @@ public class ReplyRecyclerAdapter extends RecyclerView.Adapter<ReplyRecyclerAdap
     private News_detail news_detail;
     private Context context;
     private List<Reply> List;
-    private String user_id;
+    private String user_id,user_idx;
     String TAG = "!!!ReplyRecyclerView";
 
     public ReplyRecyclerAdapter(Context context, java.util.List<Reply> list) {
@@ -56,9 +56,10 @@ public class ReplyRecyclerAdapter extends RecyclerView.Adapter<ReplyRecyclerAdap
         holder.onBind(List.get(position));
     }
 
-    public void setList(List<Reply> list,String user_id){
+    public void setList(List<Reply> list,String user_id,String user_idx){
         this.List = list;
         this.user_id = user_id;
+        this.user_idx = user_idx;
         notifyDataSetChanged();
     }
 
@@ -148,7 +149,9 @@ public class ReplyRecyclerAdapter extends RecyclerView.Adapter<ReplyRecyclerAdap
 
                 reply_datetime.setText(item.getDatetime());
                 reply_content.setText(item.getContent());
-                if (user_id.equals(item.getUser_profile_img())) {
+                Log.d(TAG,item.getUser_profile_img() + user_idx);
+
+                if (user_idx.equals(item.getUser_profile_img())) {
                     reply_delete.setVisibility(View.VISIBLE);
                     reply_update.setVisibility(View.VISIBLE);
                     reply_nickname.setText("[" + item.getUser_nickname()+"]");

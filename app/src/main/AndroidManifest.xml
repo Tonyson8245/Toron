@@ -37,16 +37,16 @@
         <activity android:name=".Login.Find_id_Activity" />
         <activity android:name=".Login.Find_account" />
         <activity android:name=".Login.Login">
-
-        </activity>
-        <activity android:name=".Login.Join" />
-        <activity android:name=".MainActivity" />
-        <activity android:name=".Main.Mainpage">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity android:name=".Login.Join" />
+        <activity android:name=".MainActivity" />
+        <activity android:name=".Main.Mainpage">
+
         </activity>
         <service
             android:name=".Service.RemoteService"

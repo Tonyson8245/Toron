@@ -148,30 +148,16 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <TextView
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#4469C5"
-                android:text="\@"/>
-                <TextView
-                    android:textStyle="bold"
                     android:id="@+id/Tv_tag_nickname"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#4469C5"
-                    android:text="닉네임: "/>
+                    android:text="닉네임: "
+                    android:textStyle="bold" />
             </LinearLayout>
-            <TextView
-                android:id="@+id/Tv_tag_content"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:layout_weight="1"/>
         </LinearLayout>
         <Button
             android:layout_gravity="center"
-            android:layout_width="40dp"
+            android:layout_width="20dp"
             android:layout_height="match_parent"
             android:background="@drawable/ic_baseline_close_24"
             android:id="@+id/btn_tag_close"/>
@@ -194,12 +180,6 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:hint="의견 남기기" />
-        <Button
-            android:id="@+id/insert_tag_message"
-            android:visibility="gone"
-            android:layout_width="70dp"
-            android:text="입력"
-            android:layout_height="match_parent"/>
         <Button
             android:id="@+id/insert_message"
             android:layout_width="70dp"

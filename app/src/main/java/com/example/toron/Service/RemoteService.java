@@ -222,7 +222,9 @@ public class RemoteService extends Service {
             }
         }
         else{
-            create_notify(chat);
+            if(chat.getTag_user_idx()!=null) {
+                if (chat.getTag_user_idx().equals(user_idx)) create_notify(chat);
+            }
         }
     } // 액티비티로 채팅 보내주기 ,  노티 아니면 문자 추가
 
@@ -266,8 +268,9 @@ public class RemoteService extends Service {
         String user_idx = bundle.getString("user_idx");
         String datetime = bundle.getString("datetime");
         String side = bundle.getString("side");
+        String tag_user_idx = bundle.getString("tag_user_idx");
 
-        Chat chat = new Chat(room_idx,msg,user_idx,datetime,side,"");
+        Chat chat = new Chat("",room_idx,msg,user_idx,datetime,side,"",tag_user_idx); // 닉네임이랑 chat_idx 는 서버에서 넣어준다. 왜 이딴 식으로 짰는지 참..
         Request request = new Request("CHAT",gson.toJson(chat));
         SendToServerThread sendToServerThread = new SendToServerThread(socket,gson.toJson(request));
         sendToServerThread.start();

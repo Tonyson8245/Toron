@@ -1,28 +1,21 @@
 package com.example.toron.Service.Class;
 
 public class Chat {
+    String chat_idx;
     String room_idx;
     String msg;
     String user_idx;
     String datetime;
     String side;
     String nickname;
+    String tag_user_idx;
 
-
-    public Chat(String room_idx, String msg, String user_idx, String datetime, String side, String nickname) {
-        this.room_idx = room_idx;
-        this.msg = msg;
-        this.user_idx = user_idx;
-        this.datetime = datetime;
-        this.side = side;
-        this.nickname = nickname;
-    }
-    public String getNickname() {
-        return nickname;
+    public String getChat_idx() {
+        return chat_idx;
     }
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
+    public void setChat_idx(String chat_idx) {
+        this.chat_idx = chat_idx;
     }
 
     public String getRoom_idx() {
@@ -63,5 +56,32 @@ public class Chat {
 
     public void setSide(String side) {
         this.side = side;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public String getTag_user_idx() {
+        return tag_user_idx;
+    }
+
+    public void setTag_user_idx(String tag_user_idx) {
+        this.tag_user_idx = tag_user_idx;
+    }
+
+    public Chat(String chat_idx, String room_idx, String msg, String user_idx, String datetime, String side, String nickname, String tag_user_idx) {
+        this.chat_idx = chat_idx;
+        this.room_idx = room_idx;
+        this.msg = msg;
+        this.user_idx = user_idx;
+        this.datetime = datetime;
+        this.side = side;
+        this.nickname = nickname;
+        this.tag_user_idx = tag_user_idx;
     }
 }

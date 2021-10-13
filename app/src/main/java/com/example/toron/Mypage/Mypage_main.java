@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.example.toron.Class.ImageLoadTask;
 import com.example.toron.R;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 
@@ -24,7 +25,7 @@ public class Mypage_main extends AppCompatActivity {
     TextView Tv_user_nickname,Tv_profile_setting;
     ImageView img_profile;
 
-    String user_id,user_nickname;
+    String user_id,user_nickname,user_idx;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,20 +55,29 @@ public class Mypage_main extends AppCompatActivity {
 
     void get_userdata(){
         SharedPreferences sharedPreferences;
-
         sharedPreferences = getSharedPreferences("user_data",0);
         user_id = sharedPreferences.getString("user_id",null);
+        user_idx = sharedPreferences.getString("user_idx",null);
 
         user_nickname = sharedPreferences.getString("user_nickname","nick");
         Tv_user_nickname.setText(user_nickname);
-        String uristr = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Toron/Storage/Image/profile_img.jpg";
-        Log.d("!!!!되라ㅁㄴㅇ",uristr);
-        File files = new File(uristr);
-        if(files.exists()==true) {
-            Uri uri = Uri.parse(uristr);
-            img_profile.setImageURI(uri);
-        } else {
+        String url = "http://49.247.195.99/storage/profile_img/" + user_idx + ".jpg";
+
+        Log.d("Mypage_main",url);
+        try{
+            Picasso.get().load(url).into(img_profile);
+        }catch (Exception e){
             img_profile.setImageResource(R.mipmap.ic_launcher_round);
         }
+
+//        String uristr = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Toron/Storage/Image/profile_img.jpg";
+//        Log.d("!!!!되라ㅁㄴㅇ",uristr);
+//        File files = new File(uristr);
+//        if(files.exists()==true) {
+//            Uri uri = Uri.parse(uristr);
+//            img_profile.setImageURI(uri);
+//        } else {
+//            img_profile.setImageResource(R.mipmap.ic_launcher_round);
+//        }
     }
 }

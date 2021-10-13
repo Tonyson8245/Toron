@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment;
 import com.example.toron.Mypage.Mypage_main;
 import com.example.toron.Mypage.Profile_setting;
 import com.example.toron.R;
+import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -29,7 +30,7 @@ public class Mypage_fragment extends Fragment {
     TextView Tv_user_nickname,Tv_profile_setting;
     ImageView img_profile;
 
-    String user_id,user_nickname;
+    String user_idx,user_id,user_nickname;
 
     @Nullable
     @Override
@@ -73,17 +74,27 @@ public class Mypage_fragment extends Fragment {
         SharedPreferences sharedPreferences;
         sharedPreferences = context.getSharedPreferences("user_data",0);
         user_id = sharedPreferences.getString("user_id",null);
+        user_idx = sharedPreferences.getString("user_idx",null);
         user_nickname = sharedPreferences.getString("user_nickname","nick");
         Tv_user_nickname.setText(user_nickname);
-        String uristr = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Toron/Storage/Image/profile_img.jpg";
+        String url = "http://49.247.195.99/storage/profile_img/" + user_idx + ".jpg";
 
-        File files = new File(uristr);
-        if(files.exists()==true) {
-            Uri uri = Uri.parse(uristr);
-            img_profile.setImageURI(uri);
-        } else {
+        Log.d("Mypage_main",url);
+        try{
+            Picasso.get().load(url).into(img_profile);
+        }catch (Exception e){
             img_profile.setImageResource(R.mipmap.ic_launcher_round);
         }
+
+//        String uristr = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Toron/Storage/Image/profile_img.jpg";
+//
+//        File files = new File(uristr);
+//        if(files.exists()==true) {
+//            Uri uri = Uri.parse(uristr);
+//            img_profile.setImageURI(uri);
+//        } else {
+//            img_profile.setImageResource(R.mipmap.ic_launcher_round);
+//        }
     }
 
 }

@@ -31,15 +31,16 @@
             android:textSize="13dp"
             android:text="유저 1"/>
         <TextView
-            android:paddingVertical="5dp"
-            android:paddingRight="25dp"
             android:paddingLeft="10dp"
+            android:paddingRight="25dp"
+            android:paddingVertical="5dp"
+            android:background="@drawable/myself"
             android:id="@+id/Tv_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="테스트 메세지 입니다."
-            android:maxWidth="250dp"
-            android:background="@drawable/myself"/>
+            android:maxWidth="250dp"/>
+
     </androidx.appcompat.widget.LinearLayoutCompat>
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/Img_userprofile"

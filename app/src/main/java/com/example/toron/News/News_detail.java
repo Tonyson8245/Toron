@@ -63,7 +63,7 @@ public class News_detail extends AppCompatActivity {
     ScrollView scrollview;
     LinearLayout reply_layout,layout_reply_qty;
     Button btn_back,btn_website,btn_insert_reply,btn_update_reply,btn_make_dabete;
-    String TAG = "!!!DETAIL",sort="like",total_qty,user_id;
+    String TAG = "!!!DETAIL",sort="like",total_qty,user_id,user_idx;
     InputMethodManager imm;
     private RecyclerView recyclerView;
     private ReplyRecyclerAdapter replyRecyclerAdapter;
@@ -80,6 +80,7 @@ public class News_detail extends AppCompatActivity {
 
         //댓글 데이터를 얻는 부분
         user_id = sharedPreferences.getString("user_id",null);
+        user_idx = sharedPreferences.getString("user_idx",null);
         //쉐어드
 
         Intent getdata = getIntent();
@@ -294,7 +295,7 @@ public class News_detail extends AppCompatActivity {
 
                 }
                 else Log.d(TAG,"내용 없음");
-                replyRecyclerAdapter.setList(list,user_id);
+                replyRecyclerAdapter.setList(list,user_id,user_idx);
             }
 
             @Override

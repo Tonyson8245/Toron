@@ -43,6 +43,7 @@ import com.example.toron.Retrofit.Class.Userdata_response;
 import com.example.toron.Retrofit.Class.Yesno;
 import com.example.toron.Retrofit.Interface.Inquire_intface;
 import com.example.toron.Retrofit.Interface.UserdataInterface;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -191,9 +192,9 @@ public class Profile_setting extends AppCompatActivity {
     private Boolean profile_save() {
         try {
             Bitmap bitmap = ((BitmapDrawable) img_profile.getDrawable()).getBitmap();
-            String user_id = sharedPreferences.getString("user_id", null);
+            String user_idx = sharedPreferences.getString("user_idx", null);
 
-            File file = SaveBitmapToFileCache(bitmap, (Environment.getExternalStorageDirectory().getAbsolutePath()) + "/Toron/Temp/" + user_id + ".jpg");
+            File file = SaveBitmapToFileCache(bitmap, (Environment.getExternalStorageDirectory().getAbsolutePath()) + "/Toron/Temp/" + user_idx + ".jpg");
 
             RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
             MultipartBody.Part body = MultipartBody.Part.createFormData("uploaded_file", file.getName(), requestFile);
@@ -203,7 +204,12 @@ public class Profile_setting extends AppCompatActivity {
                 @Override
                 public void onResponse(Call<Image_upload> call, Response<Image_upload> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        SaveBitmapToFileCache(bitmap, (Environment.getExternalStorageDirectory().getAbsolutePath()) + "/Toron/Storage/Image/profile_img.jpg");
+                        try{
+
+                            Picasso.get().load("http://49.247.195.99/storage/profile_img/" + user_idx + ".jpg").into(img_profile);
+                        }catch (Exception e){
+                            img_profile.setImageResource(R.mipmap.ic_launcher_round);
+                        }
                     }
                 }
 
@@ -358,22 +364,29 @@ public class Profile_setting extends AppCompatActivity {
         user_nickname = sharedPreferences.getString("user_nickname","nick");
         user_id = sharedPreferences.getString("user_id",null);
         user_birthday = sharedPreferences.getString("user_birthday",null);
+        String user_idx = sharedPreferences.getString("user_idx",null);
 
-        String uristr = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Toron/Storage/Image/profile_img.jpg";
+//        String uristr = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Toron/Storage/Image/profile_img.jpg";
 
         Ev_date.setHint(user_birthday.replace("-","/"));
         Ev_nickname.setHint(user_nickname);
+        try{
 
-        File files = new File(uristr);
-        //파일 유무를 확인합니다.
-        //파일이 없을시
-        if(files.exists()==true) {
-            Uri uri = Uri.parse(uristr);
-            img_profile.setImageURI(uri);
-            //파일이 있을시
-        } else {
+            Picasso.get().load("http://49.247.195.99/storage/profile_img/" + user_idx + ".jpg").into(img_profile);
+        }catch (Exception e){
             img_profile.setImageResource(R.mipmap.ic_launcher_round);
         }
+//
+//        File files = new File(uristr);
+//        //파일 유무를 확인합니다.
+//        //파일이 없을시
+//        if(files.exists()==true) {
+//            Uri uri = Uri.parse(uristr);
+//            img_profile.setImageURI(uri);
+//            //파일이 있을시
+//        } else {
+//            img_profile.setImageResource(R.mipmap.ic_launcher_round);
+//        }
 
     }
 

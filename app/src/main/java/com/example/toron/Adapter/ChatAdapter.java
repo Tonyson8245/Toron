@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -86,6 +87,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm");
         String datetime = dateFormatter.format(date);
+        String imageStr = "http://49.247.195.99/storage/profile_img/" +chat.getUser_idx()+".jpg";
 
 
         if (holder instanceof AHolder) { //A가 남이다.
@@ -96,18 +98,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             ((AHolder) holder).nickname.setText(nickname);
             ((AHolder) holder).datetime.setText(datetime);
 
-            String imageStr = "http://49.247.195.99/storage/profile_img/" +chat.getUser_idx()+".jpg";
-
-            // 다른 사람 이미지는 서버에서 가져온다
-            Picasso.get()
-                    .load(imageStr)
-                    .error(R.drawable.ic_baseline_account_circle_24)
-                    .into(((AHolder) holder).profile);
-
-            ((AHolder) holder).content.setOnClickListener(new View.OnClickListener() {
+            ((AHolder) holder).profile.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    debate_room.set_TagMode("chat_idx",nickname,msg);
+                    debate_room.set_TagMode(chat.getUser_idx(),nickname);
                 }
             }); // 태그의 경우 한번 클릭
 
@@ -118,6 +112,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     return false;
                 }
             }); // 신고, 좋아요의 경우 Long button
+            // 이미지는 서버에서 가져온다
+            Picasso.get()
+                    .load(imageStr)
+                    .error(R.drawable.ic_baseline_account_circle_24)
+                    .into(((AHolder) holder).profile);
 
         } else {
             ((BHolder) holder).content.setText(msg);
@@ -128,15 +127,23 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             ((BHolder) holder).datetime.setText(datetime);
 
             // 내 이미지는 로컬에서 가져온다
-            String uristr = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Toron/Storage/Image/profile_img.jpg";
-            File files = new File(uristr);
-            if(files.exists()==true) {
-                Uri uri = Uri.parse(uristr);
-                ((BHolder) holder).profile.setImageURI(uri);
-            } else {
-                ((BHolder) holder).profile.setImageResource(R.mipmap.ic_launcher_round);
-            }
+//            String uristr = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Toron/Storage/Image/profile_img.jpg";
+//            File files = new File(uristr);
+//            if(files.exists()==true) {
+//                Uri uri = Uri.parse(uristr);
+//                ((BHolder) holder).profile.setImageURI(uri);
+//            } else {
+//                ((BHolder) holder).profile.setImageResource(R.mipmap.ic_launcher_round);
+//            }.
+            // 이미지는 서버에서 가져온다
+            Picasso.get()
+                    .load(imageStr)
+                    .error(R.drawable.ic_baseline_account_circle_24)
+                    .into(((BHolder) holder).profile);
         }
+
+
+
     }
 
     private Chat getChat(int position) {

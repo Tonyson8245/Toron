@@ -52,12 +52,14 @@ public class Debate_room extends AppCompatActivity {
     private Messenger mClientCallback = new Messenger(new CallbackHandler());
     // 액티비티 <-> 서비스 : 서비스에서 액티비티로 결과를 리턴을 받을 때 쓰임 ; HTTP 통신과 유사한 개념
 
+    Boolean TAG_MODE =false;
+
     ArrayList<Chat> chat_list = new ArrayList<>();
     LinearLayout tag_layout;
-    TextView Tv_subject,Tv_description,Tv_tag_nickname,Tv_tag_content;
+    TextView Tv_subject,Tv_description,Tv_tag_nickname;
     EditText Ev_message_content;
-    Button btn_send,btn_back,btn_tag_close;
-    String TAG = "Debate_room",room_idx,side;
+    Button btn_send,btn_back,btn_tag_close,btn_insert_tag_message;
+    String TAG = "Debate_room",room_idx,side,tag_user_idx,tag_user_nickname;
     Date time = new Date();
     SimpleDateFormat format1 = new SimpleDateFormat ( "yyyy-MM-dd HH:mm:ss");
 
@@ -71,7 +73,6 @@ public class Debate_room extends AppCompatActivity {
         side = getData.getStringExtra("side");
 
         Tv_subject = findViewById(R.id.Tv_subject);
-        Tv_tag_content = findViewById(R.id.Tv_tag_content);
         Tv_tag_nickname = findViewById(R.id.Tv_tag_nickname);
         Tv_description = findViewById(R.id.Tv_description);
         btn_send = findViewById(R.id.insert_message);
@@ -109,6 +110,9 @@ public class Debate_room extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 tag_layout.setVisibility(View.GONE);
+                TAG_MODE = false;//  TAG_MODE OFF
+                tag_user_idx = null;
+                tag_user_nickname = null;
             }
         });
     }
@@ -180,7 +184,7 @@ public class Debate_room extends AppCompatActivity {
                     Log.d(TAG,"Chat" + bundle2.getString("chat"));
                     Chat chat = gson.fromJson(temp_msg,Chat.class);
                     if(chat.getRoom_idx().equals(room_idx)) {
-                        chat_list.add(new Chat(chat.getRoom_idx(), chat.getMsg(), chat.getUser_idx(), chat.getDatetime(), chat.getSide(), chat.getNickname()));
+                        chat_list.add(new Chat(chat.getChat_idx(),chat.getRoom_idx(), chat.getMsg(), chat.getUser_idx(), chat.getDatetime(), chat.getSide(), chat.getNickname(),chat.getTag_user_idx()));
                         chatAdapter.notifyItemChanged(chat_list.size() - 1);
                         toBottom();
                     }
@@ -244,20 +248,34 @@ public class Debate_room extends AppCompatActivity {
         sharedPreferences = this.getSharedPreferences("user_data",0);
         String user_idx = sharedPreferences.getString("user_idx",null);
         String user_nickname = sharedPreferences.getString("user_nickname",null);
+        String tag = null,content = null;
+        if(TAG_MODE){
+            content = "@"+tag_user_nickname+" "+ msg;
+            tag = tag_user_idx;
+        }// tag 모드 켜짐
+        else{
+            tag = null;
+            content = msg;
+        }//tag 모드 꺼짐
 
         String time_data = format1.format(time);
         Log.d(TAG,"time" + time_data);
 
-        chat_list.add(new Chat(room_idx,msg,user_idx,time_data,side,user_nickname));
+        chat_list.add(new Chat("",room_idx,content,user_idx,time_data,side,user_nickname,tag_user_idx)); //  나를 태그 할 일은 업승니까 그냥 보내자.
         chatAdapter.notifyItemChanged(chat_list.size()-1);
         //클라에 추가
 
         Bundle bundle = new Bundle();
-        bundle.putString("msg",msg);
         bundle.putString("room_idx",room_idx);
         bundle.putString("user_idx",user_idx);
         bundle.putString("datetime",time_data);
         bundle.putString("side",side);
+        bundle.putString("tag_user_idx",tag);
+        bundle.putString("msg",content);
+
+        Log.d(TAG,"tag_user_idx" + tag_user_idx);
+
+
 
         if (mServiceCallback != null) {
             // request 'add value' to service
@@ -273,12 +291,13 @@ public class Debate_room extends AppCompatActivity {
         toBottom();
     }
 
-    public void set_TagMode(String chat_idx,String nickname, String msg){
+    public void set_TagMode(String user_idx,String nickname){
         tag_layout.setVisibility(View.VISIBLE);
 
-        Tv_tag_nickname.setText(nickname);
-        Tv_tag_content.setText(": "+msg);
+        tag_user_idx = user_idx; // tag_user_idx 설정
+        tag_user_nickname = nickname;
 
-        Log.d(TAG,chat_idx + " " + nickname + " " + msg);
+        TAG_MODE = true; //  TAG_MODE ON
+        Tv_tag_nickname.setText("to." + nickname);
     }
 }
