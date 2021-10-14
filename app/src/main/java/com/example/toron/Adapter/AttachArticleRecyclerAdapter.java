@@ -76,7 +76,6 @@ public class AttachArticleRecyclerAdapter extends RecyclerView.Adapter<AttachArt
                 public void onClick(View v) {
                     int pos = getAdapterPosition() ;
                     if (pos != RecyclerView.NO_POSITION) {
-                        Log.d("!!!adapter",List.get(pos).getNews_href());
                         debate_selectSide.MoveToArticle(href);
                     }
                 }

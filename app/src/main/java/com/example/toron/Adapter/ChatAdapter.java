@@ -28,6 +28,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -36,8 +37,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public static final int VIEW_TYPE_B = 2;
     Context context;
     Debate_room debate_room;
-    String nickname,user_idx,TAG = " chatAdapter";
+    String nickname,user_idx,TAG = "chatAdapter";
     private ArrayList<Chat> list = new ArrayList<>();
+    private HashMap<String ,Integer> chat_list = new HashMap<>();
 
     public ChatAdapter(ArrayList<Chat> list, Context context) {
         SharedPreferences sharedPreferences;
@@ -60,6 +62,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
+    public int get_Tag_Item_Position(String tag_chat_idx){
+        int position  = chat_list.get(tag_chat_idx);
+        return position;
+    } //tag 아이템 위치 호춤
+
     @Override
     public int getItemViewType(int position) {
         if (list.get(position).getUser_idx().equals(user_idx)) {
@@ -75,6 +82,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         String msg = chat.getMsg();
         String nickname = chat.getNickname();
         String side = chat.getSide();
+
 
         String time_data = chat.getDatetime();
         Date date = null;
@@ -142,8 +150,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     .into(((BHolder) holder).profile);
         }
 
-
-
     }
 
     private Chat getChat(int position) {
@@ -152,6 +158,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public void set_chatlist(ArrayList<Chat> list){
         this.list = list;
+
+        for(int i=0;i<list.size();i++){
+            if(list.get(i).getTag_user_idx()!=null) chat_list.put(list.get(i).getChat_idx(),i);
+        }
         notifyDataSetChanged();
     }
 

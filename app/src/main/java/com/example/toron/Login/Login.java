@@ -117,6 +117,7 @@ public class Login extends AppCompatActivity {
 
         if(auto_login.getString("auto_login","OFF").equals("ON")){
             Intent intent = new Intent(Login.this, Mainpage.class);
+            intent.putExtra("page","login");
             startActivity(intent);
             Toast.makeText(getApplicationContext(),"자동 로그인되었습니다.",Toast.LENGTH_SHORT).show();
             finish();
@@ -146,6 +147,7 @@ public class Login extends AppCompatActivity {
             public void run() {
                 // 시간 지난 후 실행할 코딩
                 Intent intent = new Intent(Login.this, Mainpage.class);
+                intent.putExtra("page","login");
                 startActivity(intent);
                 finish();
             }

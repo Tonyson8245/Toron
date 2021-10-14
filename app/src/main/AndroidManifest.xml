@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.toron">
 
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -21,8 +25,6 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
 
         android:usesCleartextTraffic="true">
-        <activity android:name=".Debate.Debate_make"></activity>
-        <activity android:name=".Debate.Debate_room" />
         <activity android:name=".Debate.Debate_SelectSide" >
 
         </activity>
@@ -39,18 +41,49 @@
         <activity android:name=".Login.Login">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name=".Login.Join" />
         <activity android:name=".MainActivity" />
-        <activity android:name=".Main.Mainpage">
 
+        <activity android:name=".Debate.Debate_make"/>
+
+        <activity
+            android:launchMode="singleTop"
+            android:name=".Debate.Debate_room"
+            android:parentActivityName=".Main.Mainpage">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".Main.Mainpage"/>
         </activity>
+
+        <activity
+            android:name=".Main.Mainpage"
+            android:launchMode="singleTop"
+            >
+        </activity>
+
         <service
             android:name=".Service.RemoteService"
-            android:process=":remote" />
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".Service.RestartService"
+            android:enabled="true"
+            android:exported="true" />
+
+
+        <receiver android:name=".Service.AlarmReceiver" />
+        <receiver
+            android:name=".Service.RebootRecever"
+            android:enabled="true"
+            android:exported="false"
+            android:process=":remote">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

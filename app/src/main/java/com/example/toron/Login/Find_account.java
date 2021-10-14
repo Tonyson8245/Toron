@@ -106,7 +106,6 @@ public class Find_account extends AppCompatActivity {
                             String result = response.body().getResult();
                             if(result.equals("success")){
                                 String user_id = response.body().getUserinfo().getUser_id();
-                                Log.d("!!!FIND:Success",user_id);
                                 Ev_id_phonenum.setText("");
                                 Intent Find_id_Activity = new Intent(Find_account.this, Find_id_Activity.class);
                                 Find_id_Activity.putExtra("user_id",user_id);
@@ -122,7 +121,6 @@ public class Find_account extends AppCompatActivity {
                     }
                     @Override
                     public void onFailure(Call<Userdata_response> call, Throwable t) {
-                        Log.d("!!!FIND",t.getMessage());
                     }
                 });
 
@@ -133,7 +131,6 @@ public class Find_account extends AppCompatActivity {
             public void onClick(View v) {
                 auth_time=5;
                 String phone_num = Ev_pw_phonenum.getText().toString();
-                Log.d("!!!:FIND",phone_num);
                 if(phone_num.trim().length()==0) Toast.makeText(getApplicationContext(),"핸드폰 번호를 입력해주세요." ,Toast.LENGTH_SHORT).show();
                 else if(Pattern.matches("^\\d{3}\\d{3,4}\\d{4}$", phone_num))
                 {

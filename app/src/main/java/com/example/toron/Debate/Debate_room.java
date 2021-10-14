@@ -16,6 +16,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -26,9 +27,12 @@ import android.widget.Toast;
 
 import com.example.toron.Adapter.ChatAdapter;
 import com.example.toron.Fragment.Devate_fragment;
+import com.example.toron.Main.Mainpage;
 import com.example.toron.R;
+import com.example.toron.Retrofit.ApiClient;
+import com.example.toron.Retrofit.Class.Room_data;
+import com.example.toron.Retrofit.Interface.DebateInterface;
 import com.example.toron.Service.Class.Chat;
-import com.example.toron.Service.Class.Room_data;
 import com.example.toron.Service.Class.Status_Foreground;
 import com.example.toron.Service.RemoteService;
 import com.google.gson.Gson;
@@ -37,9 +41,14 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static java.time.LocalDateTime.now;
 
@@ -59,7 +68,7 @@ public class Debate_room extends AppCompatActivity {
     TextView Tv_subject,Tv_description,Tv_tag_nickname;
     EditText Ev_message_content;
     Button btn_send,btn_back,btn_tag_close,btn_insert_tag_message;
-    String TAG = "Debate_room",room_idx,side,tag_user_idx,tag_user_nickname;
+    String TAG = "Debate_room",room_idx,side,tag_user_idx,tag_user_nickname,tag_chat_idx=null;
     Date time = new Date();
     SimpleDateFormat format1 = new SimpleDateFormat ( "yyyy-MM-dd HH:mm:ss");
 
@@ -70,7 +79,14 @@ public class Debate_room extends AppCompatActivity {
         setContentView(R.layout.activity_debate_room);
 
         Intent getData = getIntent();
-        side = getData.getStringExtra("side");
+        room_idx = getData.getStringExtra("room_idx");
+        if(!TextUtils.isEmpty(getData.getStringExtra("tag_chat_idx"))){
+            tag_chat_idx = getData.getStringExtra("tag_chat_idx");
+            Log.d(TAG,"tag" + tag_chat_idx);
+        }// tag_메세지 때문에 들어옴
+//        side = getData.getStringExtra("side");
+//        Tv_subject.setText(getData.getStringExtra("room_subject"));
+//        Tv_description.setText(getData.getStringExtra("room_description"));// + cons pros   가져오기
 
         Tv_subject = findViewById(R.id.Tv_subject);
         Tv_tag_nickname = findViewById(R.id.Tv_tag_nickname);
@@ -81,9 +97,7 @@ public class Debate_room extends AppCompatActivity {
         tag_layout = findViewById(R.id.tag_layout);
         btn_tag_close = findViewById(R.id.btn_tag_close);
 
-        Tv_subject.setText(getData.getStringExtra("room_subject"));
-        Tv_description.setText(getData.getStringExtra("room_description"));
-        room_idx = getData.getStringExtra("room_idx");
+
 
         chat_RecyclerView = findViewById(R.id.dabate_recyclerview);
         chat_RecyclerView.setHasFixedSize(true);
@@ -116,6 +130,43 @@ public class Debate_room extends AppCompatActivity {
             }
         });
     }
+
+    private void getRoomData(String room_idx){
+        SharedPreferences sharedPreferences;
+        sharedPreferences = this.getSharedPreferences("user_data",0);
+        String user_idx = sharedPreferences.getString("user_idx",null);
+
+        DebateInterface debateInterface = ApiClient.getApiClient().create(DebateInterface.class);
+        Call<com.example.toron.Retrofit.Class.Room_data> call = debateInterface.Select_Room_data(user_idx,room_idx);
+
+        call.enqueue(new Callback<com.example.toron.Retrofit.Class.Room_data>() {
+            @Override
+            public void onResponse(Call<com.example.toron.Retrofit.Class.Room_data> call, Response<com.example.toron.Retrofit.Class.Room_data> response) {
+                if(response.body()!=null && response.isSuccessful()){
+                    Tv_subject.setText(response.body().getRoom_subject());
+                    Tv_description.setText(response.body().getRoom_description());
+                    side = response.body().getUser_maker();
+                    Log.d(TAG,"side"+side);
+//
+//                    if(cons.size()>0) {
+//                        cons = response.body().getCons();
+//                        consAdapter.notifyDataSetChanged();
+//                        consAdapter.setList(cons);
+//                    }
+//                    if(pros.size()>0) {
+//                        pros = response.body().getPros();
+//                        prosAdapter.setList(pros);
+//                        prosAdapter.notifyDataSetChanged();
+//                    }
+                }
+            }
+            @Override
+            public void onFailure(Call<Room_data> call, Throwable t) {
+                Log.d(TAG,"failed" + t.getMessage());
+            }
+        });
+    } //  방 번호를 통해 방 정보를 가져옴
+
 
     private ServiceConnection mConnection = new ServiceConnection(){
         @Override
@@ -151,12 +202,14 @@ public class Debate_room extends AppCompatActivity {
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE); // 여기서 액티비티와 서비스를 바인드 해줌
 
         request_chat_list(Integer.valueOf(room_idx));
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         Log.d("mClient", "onPause:Debate_room");
+        disconnect_service();
         unbindService(mConnection);
     }
 
@@ -173,9 +226,18 @@ public class Debate_room extends AppCompatActivity {
                     Log.d(TAG,bundle.getString("list"));
                     ArrayList<Chat> temp_list = gson.fromJson(bundle.getString("list"), type);
                     chat_list = temp_list;
+
+                    getRoomData(room_idx);
                     chatAdapter.set_chatlist(chat_list);
                     chatAdapter.notifyDataSetChanged();
-                    toBottom();
+
+                    if(tag_chat_idx!=null){
+                        totTagMessage(tag_chat_idx);
+                        tag_chat_idx = null;
+                    }
+                    else{
+                        toBottom();
+                    }
                     break;
                 case RemoteService.MSG_GET_CHAT:
                     Bundle bundle2 = (Bundle) msg.obj;;
@@ -234,6 +296,20 @@ public class Debate_room extends AppCompatActivity {
         }
     }
 
+    private void disconnect_service(){
+        if (mServiceCallback != null) {
+            // request 'add value' to service
+            Message msg = Message.obtain(
+                    null, RemoteService.MSG_CLIENT_DISCONNECT);
+            try {
+                mServiceCallback.send(msg);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+            Log.d(TAG, "Send MSG_CLIENT_DISCONNECT message to Service");
+        }
+    }
+
     private void toBottom(){
         chat_RecyclerView.post(new Runnable() {
             @Override
@@ -242,6 +318,17 @@ public class Debate_room extends AppCompatActivity {
             }
         });
     }
+
+    private void totTagMessage(String tag_chat_idx){
+
+        chat_RecyclerView.post(new Runnable() {
+            @Override
+            public void run() {
+                chat_RecyclerView.scrollToPosition(chatAdapter.get_Tag_Item_Position(tag_chat_idx));
+            }
+        });
+    }
+
 
     private void send_msg(String msg){
         SharedPreferences sharedPreferences;

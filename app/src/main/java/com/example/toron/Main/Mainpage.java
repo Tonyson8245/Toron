@@ -4,12 +4,15 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.PowerManager;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -34,7 +37,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import javax.security.auth.callback.CallbackHandler;
 
 public class Mainpage extends AppCompatActivity {
-
+    private Intent serviceIntent;
     private BottomNavigationView mBottomNV;
     private Messenger mServiceCallback = null;
     // 서비스로부터 전달 받는 객체 바인딩 시 제공하는 IBinder 로 만들어진 Messenger 객체
@@ -42,25 +45,54 @@ public class Mainpage extends AppCompatActivity {
     // 액티비티 <-> 서비스 : 서비스에서 액티비티로 결과를 리턴을 받을 때 쓰임 ; HTTP 통신과 유사한 개념
 
     String TAG = "Mainpage";
+    String page = "news";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Intent getData = getIntent();
+
         setContentView(R.layout.activity_navigator_test);
 
         mBottomNV = findViewById(R.id.nav_view);
         mBottomNV.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() { //NavigationItemSelecte
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+
                 BottomNavigate(menuItem.getItemId());
                 return true;
             }
         });
-        mBottomNV.setSelectedItemId(R.id.navigation_news);
 
+        if(!TextUtils.isEmpty(getData.getStringExtra("page"))){
+            page = getData.getStringExtra("page");
+            Log.d(TAG,"tag" + page);
+            mBottomNV.setSelectedItemId(R.id.navigation_news);
+        }// tag_메세지 때문에 들어옴
+        else mBottomNV.setSelectedItemId(R.id.navigation_devate);
 
-        Log.d(TAG, "Trying to connect to service");
+        ///////immortal service
 
+        PowerManager pm = (PowerManager) getApplicationContext().getSystemService(POWER_SERVICE); //안드로이드 절전 모드 설정을 위한 Power_Manager
+
+        boolean isWhiteListing = false;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            isWhiteListing = pm.isIgnoringBatteryOptimizations(getApplicationContext().getPackageName()); // SDK 버전 M 이상 부터는 Power_Manager 를 통해 절전모드 해제 해줘야한다.
+        }
+        if (!isWhiteListing) {
+            Intent intent = new Intent();
+            intent.setAction(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS); // 절전모드 설정
+            intent.setData(Uri.parse("package:" + getApplicationContext().getPackageName()));
+            startActivity(intent);
+        }
+
+        if (RemoteService.serviceIntent==null) { // 기존에 서비스가 없다면
+            serviceIntent = new Intent(this, RemoteService.class); // 서비스를 생성
+            startService(serviceIntent); // 서비스 실행
+        } else {  //기존 서비스가 있다면
+            serviceIntent = RemoteService.serviceIntent;//getInstance().getApplication(); // 서비스의 인텐트를 가져와서 메인 서비스에 다시 설정
+            Toast.makeText(getApplicationContext(), "already", Toast.LENGTH_LONG).show(); // 이미 돌고 있다는 토스트 띄운다.
+        }
     }
 
     @Override
@@ -75,7 +107,17 @@ public class Mainpage extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         unbindService(mConnection);
+        disconnect_service();
         Log.d("mClient","onPause:Mainpage");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (serviceIntent!=null) { // 서비스가 있을 경우에는
+            stopService(serviceIntent); // 서비스를 종료하고
+            serviceIntent = null; // 서비스를 null 상태로 만들어둔다.
+        }
     }
 
     private void BottomNavigate(int id) {  //BottomNavigation 페이지 변경
@@ -196,5 +238,19 @@ public class Mainpage extends AppCompatActivity {
             select_side.putExtra("room_description",room_description);
             startActivity(select_side);
         }// 노참석
+    }
+
+    private void disconnect_service(){
+        if (mServiceCallback != null) {
+            // request 'add value' to service
+            Message msg = Message.obtain(
+                    null, RemoteService.MSG_CLIENT_DISCONNECT);
+            try {
+                mServiceCallback.send(msg);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+            Log.d(TAG, "Send MSG_CLIENT_DISCONNECT message to Service");
+        }
     }
 }

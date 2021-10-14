@@ -4,6 +4,14 @@ public class Response {
     String type;
     String data;
 
+    @Override
+    public String toString() {
+        return "Response{" +
+                "type='" + type + '\'' +
+                ", data='" + data + '\'' +
+                '}';
+    }
+
     public String getType() {
         return type;
     }

@@ -82,7 +82,6 @@ public class ImageLoadTask extends AsyncTask<Void,Void, Bitmap> {
         catch (Exception e)
         {
             e.printStackTrace();
-            Log.d(TAG,"먼대!!!!!!!"+ e.getMessage());
         }
         finally
         {

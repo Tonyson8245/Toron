@@ -24,6 +24,7 @@ public interface DebateInterface {
     @FormUrlEncoded
     @POST("api/Debate/Select_Room_data.php")
     Call<Room_data> Select_Room_data(
+            @Field("user_idx") String user_idx,
             @Field("room_idx") String room_idx);
 
 

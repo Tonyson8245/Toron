@@ -93,11 +93,8 @@ public class SearchRecyclerAdapter extends RecyclerView.Adapter<SearchRecyclerAd
                 call.enqueue(new Callback<Search_news_img>() {
                     @Override
                     public void onResponse(Call<Search_news_img> call, Response<Search_news_img> response) {
-                        Log.d(TAG, response.toString());
-
                         if (response.body() != null) {
                             if (response.body().getResult().equals("success")) {
-                                Log.d(TAG, "asd" + item.getLink());
                                 try {
                                     Picasso.get().load(response.body().getImg_url()).into(Img_news);
                                     item.setImg_url(response.body().getImg_url());

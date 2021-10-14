@@ -149,7 +149,6 @@ public class ReplyRecyclerAdapter extends RecyclerView.Adapter<ReplyRecyclerAdap
 
                 reply_datetime.setText(item.getDatetime());
                 reply_content.setText(item.getContent());
-                Log.d(TAG,item.getUser_profile_img() + user_idx);
 
                 if (user_idx.equals(item.getUser_profile_img())) {
                     reply_delete.setVisibility(View.VISIBLE);

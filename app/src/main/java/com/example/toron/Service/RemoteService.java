@@ -1,13 +1,19 @@
 package com.example.toron.Service;
 
+import android.app.AlarmManager;
+import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,11 +23,14 @@ import android.os.Messenger;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.example.toron.Debate.Debate_room;
+import com.example.toron.Main.Mainpage;
 import com.example.toron.R;
 import com.example.toron.Service.Class.Chat;
 import com.example.toron.Service.Class.Request;
@@ -43,17 +52,23 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class RemoteService extends Service {
+    private Thread mainThread;
 
     MessageThread messageThread;
     Socket socket;
     Boolean isRunning = true;
     Gson gson = new Gson();
 
-    private final String TAG = "RemoteService";
+    public static Intent serviceIntent = null;
+
+    private final String TAG = "!!!RemoteService";
     public static final int MSG_CLIENT_CONNECT = 1;
     public static final int MSG_CLIENT_DISCONNECT = 2;
     public static final int MSG_ADD_VALUE = 3;
@@ -87,20 +102,63 @@ public class RemoteService extends Service {
         SharedPreferences sharedPreferences;
         sharedPreferences = getApplication().getSharedPreferences("user_data",0);
         user_idx = sharedPreferences.getString("user_idx",null);
-        start_connect(user_idx);
         createNotificationChannel("DEFAULT", "default channel", NotificationManager.IMPORTANCE_HIGH);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        return START_STICKY;
-    }
+        //immortal service
+        serviceIntent = intent; // 메인 액티비티에서 전달받은 인텐트 대입
+        showToast(getApplication(), "Start Service"); // 서비스 시작 토스트
+
+        start_connect(user_idx);
+        Log.d(TAG,"부활!!");
+
+        return START_NOT_STICKY; //START_NOT_STICKY : 강제로 종료된 서비스가 재시작 하지 않음
+     }
+
+    public void showToast(final Application application, final String msg) {
+        Handler h = new Handler(application.getMainLooper());
+        h.post(new Runnable() {
+            @Override
+            public void run() {
+//                Toast.makeText(application, msg, Toast.LENGTH_LONG).show();
+            }
+        });
+    } // 토스트 보여주는 함수 서비스에서는 작동이 안되기때문에 어플리케이션 값을 받아오느는듯
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() { // 종료시 (=서비스가 꺼질 상황이 발생 시)
         super.onDestroy();
+        Request request = new Request("QUIT",null);
+        SendToServerThread sendToServerThread = new SendToServerThread(socket,gson.toJson(request));
+        sendToServerThread.start(); // 채팅 연결 종료
+
+        serviceIntent = null; // 서비스 인텐트 null
+        setAlarmTimer(); // 여기서 알람을 만든다.
+        Thread.currentThread().interrupt(); // 서비스 쓰레드를 인터럽트 시켜서 더이상 작동이 안되게 한다. 이러면 null 이 될거다.
+
+        if (messageThread != null) { // mainThread 도 종료 시킨다.
+            messageThread.interrupt();
+            messageThread = null;
+        }
     }
+
+    protected void setAlarmTimer() {
+        final Calendar c = Calendar.getInstance(); // 캘린더변수 생성
+        c.setTimeInMillis(System.currentTimeMillis()); // 현재 시간
+        c.add(Calendar.MILLISECOND, 100); // 현재시간 + 1초
+        Log.d("!!!time",c.getTime().toString());
+        Intent intent = new Intent(this, AlarmReceiver.class); // 알람 리시버에 보낼 인텐트 생성
+        intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+
+        PendingIntent sender = PendingIntent.getBroadcast(this, 0,intent,0); // 이 서비스로부터 알람 인텐를 포함한 PendingIntent 생성
+        AlarmManager mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE); // 실제 알람 설정할 시스템 알람 객체
+        mAlarmManager.setExact(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), sender);// 알람 개체 알람을 포함하여 보내준다. //AlarmManager.RTC_WAKEUP 일정 기간 이후 브로드캐스트를 한 번 발생 시키는 타입
+        //set으로 하면 지연시간 발생되더라
+    }
+
 
     private class CallbackHandler  extends Handler {
         @Override
@@ -202,28 +260,35 @@ public class RemoteService extends Service {
     }
 
     public void get_chat(Message message){
-        Bundle data = (Bundle) message.obj;
+        Bundle data = (Bundle) message.obj; // 받아온 채팅 데이터
 
-        Bundle bundle =  new Bundle();
+        Bundle bundle =  new Bundle(); // 보낼 데이터 만들기
         bundle.putString("chat",data.getString("chat"));
         Chat chat = gson.fromJson(data.getString("chat"),Chat.class);
 
-        Log.d(TAG,"status " + data.getString("name") + " size:" + mClientCallbacks.toString());
+        Log.d(TAG,"status " + data.getString("name") + " size:" + mClientCallbacks.toString()); // 현재 top 액티비티 파악
 
-        if(data.getString("name").equals("room") && data.getString("room_idx").equals(chat.getRoom_idx())){
-            try {
-                Log.d(TAG, "Send MSG_GET_CHAT message to client");
-                Message msg = Message.obtain(
-                        null, RemoteService.MSG_GET_CHAT);
-                msg.obj = bundle;
-                mClientCallbacks.send(msg);
-            } catch (RemoteException e) {
-                mClientCallbacks= null;
+        if(data.getString("name")!=null) {
+            if (data.getString("name").equals("room") && data.getString("room_idx").equals(chat.getRoom_idx())) { //현재 top 액티비티 파악해서 방에 있고 그방이 챗의 방과 같다면 글을 보냄
+                try {
+                    Log.d(TAG, "Send MSG_GET_CHAT message to client");
+                    Message msg = Message.obtain(
+                            null, RemoteService.MSG_GET_CHAT);
+                    msg.obj = bundle;
+                    mClientCallbacks.send(msg);
+                } catch (RemoteException e) {
+                    mClientCallbacks = null;
+                }
+            }
+            else{
+                if(chat.getTag_user_idx()!=null) {
+                    if (chat.getTag_user_idx().equals(user_idx)) create_notify(chat);
+                }
             }
         }
         else{
             if(chat.getTag_user_idx()!=null) {
-                if (chat.getTag_user_idx().equals(user_idx)) create_notify(chat);
+                if (chat.getTag_user_idx().equals(user_idx))  sendNotification_outapp(chat.getRoom_idx(), "TORON",chat.getNickname(), chat.getMsg(),chat.getChat_idx());
             }
         }
     } // 액티비티로 채팅 보내주기 ,  노티 아니면 문자 추가
@@ -245,12 +310,12 @@ public class RemoteService extends Service {
         }
         else {
             Chat chat = gson.fromJson(data,Chat.class);
-            createNotification("DEFAULT", 1, "TORON",chat.getNickname(), chat.getMsg());
+            sendNotification_outapp(chat.getRoom_idx(), "TORON",chat.getNickname(), chat.getMsg(),chat.getChat_idx());
         }
     }
 
     public void create_notify(Chat chat){
-        createNotification("DEFAULT", 1, "TORON",chat.getNickname(), chat.getMsg());
+        sendNotification_inapp(chat.getRoom_idx(),"TORON",chat.getNickname(), chat.getMsg(),chat.getChat_idx());
     }
 
     public void request_chat_list(Integer room_idx){
@@ -282,14 +347,107 @@ public class RemoteService extends Service {
                 .setPriority(NotificationCompat.PRIORITY_HIGH)          // Head Up Display를 위해 PRIORITY_HIGH 설정
                 .setSmallIcon(R.drawable.ic_launcher_foreground)        // 알림시 보여지는 아이콘. 반드시 필요
                 .setContentTitle(title)
-                .setContentText(nickname + ": " + text)
+                .setContentText(nickname + ": " + text);
                 //.setTimeoutAfter(1000)    // 지정한 시간 이후 알림 삭제
                 //.setStyle(new NotificationCompat.BigTextStyle().bigText(text))          // 한줄 이상의 텍스트를 모두 보여주고 싶을때 사용
-                .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);  // 알림시 효과음, 진동 여부
 
         NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         notificationManager.notify(id, builder.build());
     }
+
+    private void sendNotification_inapp(String room_idx, String title,String nickname, String text,String tag_chat_idx) { //todo 나중에 수정해라
+        showToast(this.getApplication(),"inapp");
+        Intent resultIntent = new Intent(this, Debate_room.class);
+        resultIntent.putExtra("room_idx",room_idx);
+        resultIntent.putExtra("tag_chat_idx",tag_chat_idx);
+        resultIntent.setAction(Intent.ACTION_MAIN);
+        resultIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+//        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+//        stackBuilder.addParentStack(Debate_room.class);
+//        stackBuilder.addNextIntent(resultIntent);
+
+        PendingIntent resultPendingIntent = PendingIntent.getActivity(getBaseContext(), 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+//
+//
+//        resultIntent.putExtra("room_idx",room_idx);
+//
+//        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+//        stackBuilder.addParentStack(Debate_room.class);
+//        stackBuilder.addNextIntent(resultIntent);
+//
+//        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+//        Intent intent = new Intent(this, Debate_room.class); // 메인 액티비티로 가는 인텐트
+//        intent.putExtra("room_idx",room_idx);
+//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //해당 인텐트를 FLAG_ACTIVITY_CLEAR_TOP 로 설정
+           //FLAG_ACTIVITY_CLEAR_TOP :호출하는 액티비티가 스택에 존재할 경우에, 해당 액티비티를 최상위로 올리면서, 그 위에 존재하던 액티비티들은 모두 삭제를 하는 플래그
+
+//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent, PendingIntent.FLAG_ONE_SHOT); // 일회용 pending_intent 생성
+
+        String channelId = "fcm_default_channel";//getString(R.string.default_notification_channel_id);
+        NotificationCompat.Builder notificationBuilder = // 노티피케이션 설정
+                new NotificationCompat.Builder(this, channelId)
+                        .setSmallIcon(R.mipmap.ic_launcher)//drawable.splash)
+                        .setContentTitle(title)
+                        .setContentText(nickname + ": " + text)
+                        .setAutoCancel(true)
+                        .setPriority(Notification.PRIORITY_HIGH)
+                        .setContentIntent(resultPendingIntent);
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE); // 노티피케이션 설정
+
+        // Since android Oreo notification channel is needed.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(channelId,"Channel human readable title", NotificationManager.IMPORTANCE_DEFAULT);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build()); // 노티피케이션
+    } // 앱이 켜졌을때 울리는 notification
+    private void sendNotification_outapp(String room_idx, String title,String nickname, String text,String tag_chat_idx) { //todo 나중에 수정해라
+
+        showToast(this.getApplication(),"outapp");
+
+        Intent resultIntent = new Intent(this, Debate_room.class);
+        resultIntent.putExtra("room_idx",room_idx);
+        resultIntent.putExtra("tag_chat_idx",tag_chat_idx);
+
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(Debate_room.class);
+        stackBuilder.addNextIntent(resultIntent);
+
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+//        Intent intent = new Intent(this, Debate_room.class); // 메인 액티비티로 가는 인텐트
+//        intent.putExtra("room_idx",room_idx);
+//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //해당 인텐트를 FLAG_ACTIVITY_CLEAR_TOP 로 설정
+           //FLAG_ACTIVITY_CLEAR_TOP :호출하는 액티비티가 스택에 존재할 경우에, 해당 액티비티를 최상위로 올리면서, 그 위에 존재하던 액티비티들은 모두 삭제를 하는 플래그
+
+//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent, PendingIntent.FLAG_ONE_SHOT); // 일회용 pending_intent 생성
+
+        String channelId = "fcm_default_channel";//getString(R.string.default_notification_channel_id);
+        NotificationCompat.Builder notificationBuilder = // 노티피케이션 설정
+                new NotificationCompat.Builder(this, channelId)
+                        .setSmallIcon(R.mipmap.ic_launcher)//drawable.splash)
+                        .setContentTitle(title)
+                        .setContentText(nickname + ": " + text)
+                        .setAutoCancel(true)
+                        .setPriority(Notification.PRIORITY_HIGH)
+                        .setContentIntent(resultPendingIntent);
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE); // 노티피케이션 설정
+
+        // Since android Oreo notification channel is needed.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(channelId,"Channel human readable title", NotificationManager.IMPORTANCE_DEFAULT);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build()); // 노티피케이션
+    } // 앱이 꺼졌을때 울리는 notification
 
     void createNotificationChannel(String channelId, String channelName, int importance){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
@@ -304,13 +462,12 @@ public class RemoteService extends Service {
         notificationManager.cancel(id);
     }
 
-
     class MessageThread extends Thread {
         Socket socket;
         DataInputStream dis;
         String msg = null;
         Boolean isRunning = true;
-        String TAG = "MessageThread";
+        String TAG = "!!!MessageThread";
 
         public MessageThread(Socket socket) {
             try {
@@ -334,7 +491,7 @@ public class RemoteService extends Service {
                     byte[] data=new byte[length];
                     dis.readFully(data);
                     String msg=new String(data,"UTF-8");
-                    Log.d("CHECK",msg);
+                    Log.d(TAG,msg);
                     receive_msg(msg);
                     // 화면에 출력
                 } catch (Exception e) {
@@ -357,8 +514,8 @@ public class RemoteService extends Service {
         public void receive_msg(String msg){
             Response response;
             if(msg!=null){
-                Log.d(TAG,"response " + msg);
                 response = gson.fromJson(msg,Response.class);
+                Log.d(TAG,"response " + response.getData());
                 switch(response.getType()){
                     case "show_roomList":
                         show_roomList(response.getData());

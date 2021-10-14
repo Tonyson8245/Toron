@@ -132,6 +132,7 @@ public class Devate_fragment extends Fragment {
     public void onPause() {
         super.onPause();
         Log.d("mClient", "onPause:Debate_fragment");
+        disconnect_service();
         getActivity().unbindService(mConnection);
     }
 
@@ -220,6 +221,19 @@ public class Devate_fragment extends Fragment {
                 e.printStackTrace();
             }
             Log.d(TAG, "Send MSG_SHOW_ROOM_LIST message to Service");
+        }
+    }
+    private void disconnect_service(){
+        if (mServiceCallback != null) {
+            // request 'add value' to service
+            Message msg = Message.obtain(
+                    null, RemoteService.MSG_CLIENT_DISCONNECT);
+            try {
+                mServiceCallback.send(msg);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+            Log.d(TAG, "Send MSG_CLIENT_DISCONNECT message to Service");
         }
     }
 }

@@ -90,7 +90,7 @@ public class Debate_SelectSide extends AppCompatActivity {
     }
     private void getRoomData(String room_idx){
         DebateInterface debateInterface = ApiClient.getApiClient().create(DebateInterface.class);
-        Call<Room_data> call = debateInterface.Select_Room_data(room_idx);
+        Call<Room_data> call = debateInterface.Select_Room_data("select",room_idx);
 
         call.enqueue(new Callback<Room_data>() {
             @Override
