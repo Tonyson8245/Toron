@@ -1,7 +1,9 @@
-package com.example.toron.Debate;
+ package com.example.toron.Debate;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.LinearLayoutCompat;
+import androidx.loader.content.CursorLoader;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -10,18 +12,23 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,14 +37,20 @@ import com.example.toron.Fragment.Devate_fragment;
 import com.example.toron.Main.Mainpage;
 import com.example.toron.R;
 import com.example.toron.Retrofit.ApiClient;
+import com.example.toron.Retrofit.Class.Image_upload;
 import com.example.toron.Retrofit.Class.Room_data;
 import com.example.toron.Retrofit.Interface.DebateInterface;
+import com.example.toron.Retrofit.Interface.Inquire_intface;
 import com.example.toron.Service.Class.Chat;
 import com.example.toron.Service.Class.Status_Foreground;
 import com.example.toron.Service.RemoteService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -46,6 +59,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -61,18 +77,43 @@ public class Debate_room extends AppCompatActivity {
     private Messenger mClientCallback = new Messenger(new CallbackHandler());
     // 액티비티 <-> 서비스 : 서비스에서 액티비티로 결과를 리턴을 받을 때 쓰임 ; HTTP 통신과 유사한 개념
 
-    Boolean TAG_MODE =false;
+    Boolean TAG_MODE =false,DETAIL_MODE = false,GET_DATA=false;
 
     ArrayList<Chat> chat_list = new ArrayList<>();
     LinearLayout tag_layout;
     TextView Tv_subject,Tv_description,Tv_tag_nickname;
+    ImageView btn_img_attach,Img_attach_img;
     EditText Ev_message_content;
-    Button btn_send,btn_back,btn_tag_close,btn_insert_tag_message;
+    Button btn_send,btn_back,btn_tag_close,btn_show_detail,btn_image_attach_close,btn_send_img;
     String TAG = "Debate_room",room_idx,side,tag_user_idx,tag_user_nickname,tag_chat_idx=null;
     Date time = new Date();
+    ScrollView layout_debate_info;
+    LinearLayout message_layout,layout_img_attach;
+    Uri img_uri;
     SimpleDateFormat format1 = new SimpleDateFormat ( "yyyy-MM-dd HH:mm:ss");
 
+    // 사진 전송 부분
+    private int GALLEY_CODE = 10;
+    private String imageUrl="";
+    private ImageView ivProfile;
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("mClient","onResume:Debate_room");
+        Intent intent = new Intent(this, RemoteService.class); // 바인드를 위한 intent
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE); // 여기서 액티비티와 서비스를 바인드 해줌
+
+        if(!GET_DATA) request_chat_list(Integer.valueOf(room_idx));
+        toBottom();
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d("mClient", "onPause:Debate_room");
+        disconnect_service();
+        unbindService(mConnection);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,8 +137,14 @@ public class Debate_room extends AppCompatActivity {
         btn_back = findViewById(R.id.btn_back);
         tag_layout = findViewById(R.id.tag_layout);
         btn_tag_close = findViewById(R.id.btn_tag_close);
-
-
+        btn_img_attach = findViewById(R.id.btn_img_attach);
+        btn_show_detail = findViewById(R.id.btn_show_detail);
+        layout_debate_info = findViewById(R.id.layout_debate_info);
+        message_layout = findViewById(R.id.message_layout);
+        Img_attach_img = findViewById(R.id.Img_attach_img);
+        btn_image_attach_close = findViewById(R.id.btn_img_attach_close);
+        layout_img_attach = findViewById(R.id.layout_img_attach);
+        btn_send_img = findViewById(R.id.btn_send_img);
 
         chat_RecyclerView = findViewById(R.id.dabate_recyclerview);
         chat_RecyclerView.setHasFixedSize(true);
@@ -129,6 +176,160 @@ public class Debate_room extends AppCompatActivity {
                 tag_user_nickname = null;
             }
         });
+        btn_img_attach.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
+                startActivityForResult(intent,GALLEY_CODE);
+            }
+        });
+        btn_show_detail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(DETAIL_MODE){
+                    DETAIL_MODE = false;
+                    chat_RecyclerView.setVisibility(View.GONE);
+                    message_layout.setVisibility(View.GONE);
+                    btn_show_detail.setText("내용 닫기");
+                }
+                else{
+                    DETAIL_MODE = true;
+                    chat_RecyclerView.setVisibility(View.VISIBLE);
+                    message_layout.setVisibility(View.VISIBLE);
+                    btn_show_detail.setText("내용 보기");
+                }
+            }
+        });
+        btn_image_attach_close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                layout_img_attach.setVisibility(View.GONE);
+                message_layout.setVisibility(View.VISIBLE);
+            }
+        });
+        btn_send_img.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                send_img(); // 이미지 전송
+
+                layout_img_attach.setVisibility(View.GONE); // 이미지 전송 레이아웃 끄고
+                message_layout.setVisibility(View.VISIBLE); // 채팅 레이아웃 키고
+            }
+        });
+
+    }
+
+    private String getRealPathFromUri(Uri uri) {
+        String[] proj= {MediaStore.Images.Media.DATA};
+        CursorLoader cursorLoader = new CursorLoader(this,uri,proj,null,null,null);
+        Cursor cursor = cursorLoader.loadInBackground();
+        int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String url = cursor.getString(columnIndex);
+        cursor.close();
+        return url;
+    }// uri 를 통해 절대 경로를 구하는 방법
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if(requestCode == GALLEY_CODE && resultCode == RESULT_OK) {
+            imageUrl = getRealPathFromUri(data.getData());
+            img_uri = data.getData();
+            Img_attach_img.setImageURI(data.getData());
+            Log.d(TAG,data.getData().toString());
+            layout_img_attach.setVisibility(View.VISIBLE);
+            message_layout.setVisibility(View.GONE);
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+   /// 서비스와 연결하고 , 서비스에서 오는 데이터에 따라 핸들러를 구동 시키는 부분
+    private ServiceConnection mConnection = new ServiceConnection(){
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) { //해당 서비스의 IBinder 라는 객체 생성
+            Log.d(TAG, "onServiceConnected");
+            mServiceCallback = new Messenger(service); // IBinder 를 통해 Messenger 객체 생성 가능
+            // mServiceCallback : 원하는 서비스의 Messegner 객체
+
+            // connect to service
+            Message connect_msg = Message.obtain( null, RemoteService.MSG_CLIENT_CONNECT);
+            connect_msg.replyTo = mClientCallback;
+            try {
+                mServiceCallback.send(connect_msg);
+                Log.d(TAG, "Send MSG_CLIENT_CONNECT message to Service");
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+
+            request_chat_list(Integer.valueOf(room_idx));
+        } // 액티비티의 messenger 객체를 서비스에 전달
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mServiceCallback = null;
+        }
+    };
+
+    public void open_img(String url) {
+        Intent open_img =  new Intent(Debate_room.this,Debate_chat_img.class);
+        open_img.putExtra("url",url);
+        startActivityForResult(open_img,0);
+    }
+
+    @Override
+    public void startActivityForResult(Intent intent, int requestCode) {
+        super.startActivityForResult(intent, requestCode);
+        switch (requestCode){
+            case 0:
+                GET_DATA = true;
+                break;
+        }
+    }
+
+    private class CallbackHandler extends Handler  {
+        Gson gson = new Gson();
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case RemoteService.MSG_GET_CHAT_LIST:
+                    Bundle bundle = (Bundle) msg.obj;
+                    Type type = new TypeToken<ArrayList<Chat>>() {}.getType();
+
+                    Log.d(TAG,bundle.getString("list"));
+                    ArrayList<Chat> temp_list = gson.fromJson(bundle.getString("list"), type);
+                    chat_list = temp_list;
+
+                    getRoomData(room_idx);
+                    chatAdapter.set_chatlist(chat_list);
+                    chatAdapter.notifyDataSetChanged();
+
+                    if(tag_chat_idx!=null){
+                        totTagMessage(tag_chat_idx);
+                        tag_chat_idx = null;
+                    }
+                    else{
+                        toBottom();
+                    }
+                    break;
+                case RemoteService.MSG_GET_CHAT:
+                    Bundle bundle2 = (Bundle) msg.obj;;
+                    String temp_msg = bundle2.getString("chat");
+
+                    Log.d(TAG,"Chat" + bundle2.getString("chat"));
+                    Chat chat = gson.fromJson(temp_msg,Chat.class);
+                    if(chat.getRoom_idx().equals(room_idx)) {
+                        chat_list.add(new Chat(chat.getChat_mode(),chat.getChat_idx(),chat.getRoom_idx(), chat.getMsg(), chat.getUser_idx(), chat.getDatetime(), chat.getSide(), chat.getNickname(),chat.getTag_user_idx(),chat.getImg_href()));
+                        chatAdapter.notifyItemChanged(chat_list.size() - 1);
+                        toBottom();
+                    }
+                    break;
+                case RemoteService.MSG_CHECK_ACTIVITY:
+                    sendBackName(msg);
+                    break;
+            }
+        }
     }
 
     private void getRoomData(String room_idx){
@@ -167,96 +368,6 @@ public class Debate_room extends AppCompatActivity {
         });
     } //  방 번호를 통해 방 정보를 가져옴
 
-
-    private ServiceConnection mConnection = new ServiceConnection(){
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) { //해당 서비스의 IBinder 라는 객체 생성
-            Log.d(TAG, "onServiceConnected");
-            mServiceCallback = new Messenger(service); // IBinder 를 통해 Messenger 객체 생성 가능
-            // mServiceCallback : 원하는 서비스의 Messegner 객체
-
-            // connect to service
-            Message connect_msg = Message.obtain( null, RemoteService.MSG_CLIENT_CONNECT);
-            connect_msg.replyTo = mClientCallback;
-            try {
-                mServiceCallback.send(connect_msg);
-                Log.d(TAG, "Send MSG_CLIENT_CONNECT message to Service");
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-
-            request_chat_list(Integer.valueOf(room_idx));
-        } // 액티비티의 messenger 객체를 서비스에 전달
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mServiceCallback = null;
-        }
-    };
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d("mClient","onResume:Debate_room");
-        Intent intent = new Intent(this, RemoteService.class); // 바인드를 위한 intent
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE); // 여기서 액티비티와 서비스를 바인드 해줌
-
-        request_chat_list(Integer.valueOf(room_idx));
-
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.d("mClient", "onPause:Debate_room");
-        disconnect_service();
-        unbindService(mConnection);
-    }
-
-
-    private class CallbackHandler extends Handler  {
-        Gson gson = new Gson();
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case RemoteService.MSG_GET_CHAT_LIST:
-                    Bundle bundle = (Bundle) msg.obj;
-                    Type type = new TypeToken<ArrayList<Chat>>() {}.getType();
-
-                    Log.d(TAG,bundle.getString("list"));
-                    ArrayList<Chat> temp_list = gson.fromJson(bundle.getString("list"), type);
-                    chat_list = temp_list;
-
-                    getRoomData(room_idx);
-                    chatAdapter.set_chatlist(chat_list);
-                    chatAdapter.notifyDataSetChanged();
-
-                    if(tag_chat_idx!=null){
-                        totTagMessage(tag_chat_idx);
-                        tag_chat_idx = null;
-                    }
-                    else{
-                        toBottom();
-                    }
-                    break;
-                case RemoteService.MSG_GET_CHAT:
-                    Bundle bundle2 = (Bundle) msg.obj;;
-                    String temp_msg = bundle2.getString("chat");
-
-                    Log.d(TAG,"Chat" + bundle2.getString("chat"));
-                    Chat chat = gson.fromJson(temp_msg,Chat.class);
-                    if(chat.getRoom_idx().equals(room_idx)) {
-                        chat_list.add(new Chat(chat.getChat_idx(),chat.getRoom_idx(), chat.getMsg(), chat.getUser_idx(), chat.getDatetime(), chat.getSide(), chat.getNickname(),chat.getTag_user_idx()));
-                        chatAdapter.notifyItemChanged(chat_list.size() - 1);
-                        toBottom();
-                    }
-                    break;
-                case RemoteService.MSG_CHECK_ACTIVITY:
-                    sendBackName(msg);
-                    break;
-            }
-        }
-    }
     private void sendBackName(Message message){
         Bundle data = (Bundle) message.obj;
 
@@ -329,7 +440,6 @@ public class Debate_room extends AppCompatActivity {
         });
     }
 
-
     private void send_msg(String msg){
         SharedPreferences sharedPreferences;
         sharedPreferences = this.getSharedPreferences("user_data",0);
@@ -348,7 +458,7 @@ public class Debate_room extends AppCompatActivity {
         String time_data = format1.format(time);
         Log.d(TAG,"time" + time_data);
 
-        chat_list.add(new Chat("",room_idx,content,user_idx,time_data,side,user_nickname,tag_user_idx)); //  나를 태그 할 일은 업승니까 그냥 보내자.
+        chat_list.add(new Chat("msg","",room_idx,content,user_idx,time_data,side,user_nickname,tag_user_idx,"")); //  나를 태그 할 일은 업승니까 그냥 보내자.
         chatAdapter.notifyItemChanged(chat_list.size()-1);
         //클라에 추가
 
@@ -386,5 +496,100 @@ public class Debate_room extends AppCompatActivity {
 
         TAG_MODE = true; //  TAG_MODE ON
         Tv_tag_nickname.setText("to." + nickname);
+    }
+
+    private void send_img(){
+        SharedPreferences sharedPreferences;
+        sharedPreferences = this.getSharedPreferences("user_data",0);
+        String user_idx = sharedPreferences.getString("user_idx",null);
+
+        if(img_uri!=null) {
+            try {
+                Log.d(TAG,img_uri.toString());
+                RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), getRealFile(img_uri));
+                MultipartBody.Part body = MultipartBody.Part.createFormData("uploaded_file", user_idx,requestFile);
+                Inquire_intface inquire_intface = ApiClient.getApiClient().create(Inquire_intface.class);
+                Call<Image_upload> resultCall = inquire_intface.uploadChatImage(body);
+                resultCall.enqueue(new Callback<Image_upload>() {
+                    @Override
+                    public void onResponse(Call<Image_upload> call, Response<Image_upload> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Log.d(TAG, "success" + response.body().getResult() + response.body().getValue());
+                            sendToService(img_uri,response.body().getValue());
+                            img_uri = null;
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Image_upload> call, Throwable t) {
+                        Log.d(TAG, "error" + t.getMessage());
+                        img_uri = null;
+                    }
+                });
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    private void sendToService(Uri img_uri,String image_name){ // 레트로핏으로 받아온 이미지 이름
+        SharedPreferences sharedPreferences;
+        sharedPreferences = this.getSharedPreferences("user_data",0);
+        String user_idx = sharedPreferences.getString("user_idx",null);
+        String user_nickname = sharedPreferences.getString("user_nickname",null);
+        String tag = null,content = null;
+
+
+        String time_data = format1.format(time);
+
+        chat_list.add(new Chat("local_img","",room_idx,"",user_idx,time_data,side,user_nickname,"",String.valueOf(img_uri)));// 로컬에서는 바로 사진 띄우자
+        chatAdapter.notifyItemChanged(chat_list.size()-1);
+        //클라에 추가
+
+        Bundle bundle = new Bundle();
+        bundle.putString("chat_mode","img");
+        bundle.putString("room_idx",room_idx);
+        bundle.putString("user_idx",user_idx);
+        bundle.putString("datetime",time_data);
+        bundle.putString("side",side);
+        bundle.putString("tag_user_idx",tag);
+        bundle.putString("msg",null);
+        bundle.putString("img_href",image_name);
+
+
+        if (mServiceCallback != null) {
+            // request 'add value' to service
+            Message message = Message.obtain(
+                    null, RemoteService.MSG_SEND_IMG);
+            message.obj = bundle;
+            try {
+                mServiceCallback.send(message);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+        toBottom();
+    }
+
+    private File getRealFile(Uri uri) {
+        String[] projection = {MediaStore.Images.Media.DATA};
+        if(uri == null) {
+            uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        }
+
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, MediaStore.Images.Media.DATE_MODIFIED + " desc");
+        if(cursor == null || cursor.getColumnCount() <1 ) {
+            return null;
+        }
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+
+        String path = cursor.getString(column_index);
+
+        if(cursor != null) {
+            cursor.close();
+            cursor = null;
+        }
+
+        return new File(path);
     }
 }

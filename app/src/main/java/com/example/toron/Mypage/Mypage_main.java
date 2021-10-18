@@ -16,6 +16,8 @@ import android.widget.TextView;
 
 import com.example.toron.Class.ImageLoadTask;
 import com.example.toron.R;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -65,7 +67,8 @@ public class Mypage_main extends AppCompatActivity {
 
         Log.d("Mypage_main",url);
         try{
-            Picasso.get().load(url).into(img_profile);
+            Picasso.get().invalidate(url);
+            Picasso.get().load(url).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_profile);
         }catch (Exception e){
             img_profile.setImageResource(R.mipmap.ic_launcher_round);
         }

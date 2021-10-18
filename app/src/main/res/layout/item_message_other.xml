@@ -20,23 +20,36 @@
         android:layout_height="wrap_content">
         <TextView
             android:id="@+id/Tv_user_name"
-            android:layout_gravity="left"
             android:layout_marginLeft="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="13dp"
             android:text="유저 1"/>
-        <TextView
-            android:background="@drawable/other"
-            android:paddingRight="10dp"
-            android:paddingLeft="25dp"
-            android:paddingVertical="5dp"
-            android:maxWidth="250dp"
-            android:id="@+id/Tv_message"
+        <LinearLayout
+            android:id="@+id/layout_other"
+            android:layout_gravity="left"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="테스트 메세지 입니다."/>
-
+            android:background="@drawable/other"
+            android:paddingRight="10dp"
+            android:paddingLeft="20dp"
+            android:paddingVertical="5dp"
+            android:orientation="vertical">
+            <ImageView
+                android:visibility="gone"
+                android:adjustViewBounds="true"
+                android:id="@+id/Img_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxHeight="200dp"
+                android:maxWidth="200dp"/>
+            <TextView
+                android:maxWidth="250dp"
+                android:id="@+id/Tv_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1"/>
+        </LinearLayout>
     </androidx.appcompat.widget.LinearLayoutCompat>
     <TextView
         android:layout_marginLeft="5dp"

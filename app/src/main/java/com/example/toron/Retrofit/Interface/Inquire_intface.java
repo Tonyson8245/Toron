@@ -13,4 +13,8 @@ public interface Inquire_intface {
     @Multipart
     @POST("api/image/upload_img.php")
     Call<Image_upload> uploadImage(@Part MultipartBody.Part File);
+
+    @Multipart
+    @POST("api/image/upload_chat_img.php")
+    Call<Image_upload> uploadChatImage(@Part MultipartBody.Part File);
 }

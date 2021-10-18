@@ -6,10 +6,12 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -43,8 +45,11 @@ import com.example.toron.Retrofit.Class.Userdata_response;
 import com.example.toron.Retrofit.Class.Yesno;
 import com.example.toron.Retrofit.Interface.Inquire_intface;
 import com.example.toron.Retrofit.Interface.UserdataInterface;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -77,6 +82,7 @@ public class Profile_setting extends AppCompatActivity {
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
     private PopupWindow mPopupWindow ;
+    Uri profile_uri;
 
     Calendar myCalendar = Calendar.getInstance();
 
@@ -190,35 +196,41 @@ public class Profile_setting extends AppCompatActivity {
     }
 
     private Boolean profile_save() {
-        try {
-            Bitmap bitmap = ((BitmapDrawable) img_profile.getDrawable()).getBitmap();
-            String user_idx = sharedPreferences.getString("user_idx", null);
+        if(profile_uri!=null) {
+            try {
+//                Bitmap bitmap = ((BitmapDrawable) img_profile.getDrawable()).getBitmap();
+                String user_idx = sharedPreferences.getString("user_idx", null);
 
-            File file = SaveBitmapToFileCache(bitmap, (Environment.getExternalStorageDirectory().getAbsolutePath()) + "/Toron/Temp/" + user_idx + ".jpg");
+//                File file = SaveBitmapToFileCache(bitmap, (Environment.getExternalStorageDirectory().getAbsolutePath()) + "/Toron/Temp/" + user_idx + ".jpg");
 
-            RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
-            MultipartBody.Part body = MultipartBody.Part.createFormData("uploaded_file", file.getName(), requestFile);
-            Inquire_intface inquire_intface = ApiClient.getApiClient().create(Inquire_intface.class);
-            Call<Image_upload> resultCall = inquire_intface.uploadImage(body);
-            resultCall.enqueue(new Callback<Image_upload>() {
-                @Override
-                public void onResponse(Call<Image_upload> call, Response<Image_upload> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        try{
+                Log.d(TAG,profile_uri.toString());
+                RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), getRealFile(profile_uri));
+                MultipartBody.Part body = MultipartBody.Part.createFormData("uploaded_file", user_idx + ".jpg", requestFile);
+                Inquire_intface inquire_intface = ApiClient.getApiClient().create(Inquire_intface.class);
+                Call<Image_upload> resultCall = inquire_intface.uploadImage(body);
+                resultCall.enqueue(new Callback<Image_upload>() {
+                    @Override
+                    public void onResponse(Call<Image_upload> call, Response<Image_upload> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Log.d(TAG, "success" + response.body().getResult() + response.body().getValue());
+                            try {
+                                String url = "http://49.247.195.99/storage/profile_img/" + user_idx + ".jpg";
 
-                            Picasso.get().load("http://49.247.195.99/storage/profile_img/" + user_idx + ".jpg").into(img_profile);
-                        }catch (Exception e){
-                            img_profile.setImageResource(R.mipmap.ic_launcher_round);
+                                Picasso.get().invalidate(url);
+                                Picasso.get().load(url).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_profile);
+                            } catch (Exception e) {
+                                img_profile.setImageResource(R.mipmap.ic_launcher_round);
+                            }
                         }
                     }
-                }
 
-                @Override
-                public void onFailure(Call<Image_upload> call, Throwable t) {
-                    Log.d(TAG,t.getMessage());
-                }
-            });
-        } catch (Exception e) {
+                    @Override
+                    public void onFailure(Call<Image_upload> call, Throwable t) {
+                        Log.d(TAG, "error" + t.getMessage());
+                    }
+                });
+            } catch (Exception e) {
+            }
         }
         String nickname = user_nickname;
         String birthday = user_birthday;
@@ -256,6 +268,7 @@ public class Profile_setting extends AppCompatActivity {
                     if (bitmap != null) {
                         img_profile.setImageBitmap(bitmap);
                     }
+                    profile_uri = getImageUri(this,bitmap);
                 }
                 break;
             case FROM_ALBUM:
@@ -266,6 +279,7 @@ public class Profile_setting extends AppCompatActivity {
                     in.close();
 
                     img_profile.setImageBitmap(img);
+                    profile_uri = intent.getData();
                 }catch(Exception e)
                 {
 
@@ -273,6 +287,12 @@ public class Profile_setting extends AppCompatActivity {
                 break;
 
         }
+    }
+    private Uri getImageUri(Context context, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(context.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
     }
 
     private void makeDialog(View v){
@@ -371,7 +391,6 @@ public class Profile_setting extends AppCompatActivity {
         Ev_date.setHint(user_birthday.replace("-","/"));
         Ev_nickname.setHint(user_nickname);
         try{
-
             Picasso.get().load("http://49.247.195.99/storage/profile_img/" + user_idx + ".jpg").into(img_profile);
         }catch (Exception e){
             img_profile.setImageResource(R.mipmap.ic_launcher_round);
@@ -472,5 +491,27 @@ public class Profile_setting extends AppCompatActivity {
         editor.putString("user_id",id);// 쉐어드에 저장
         editor.putString("user_birthday",birthday);
         editor.commit();
+    }
+    private File getRealFile(Uri uri) {
+        String[] projection = {MediaStore.Images.Media.DATA};
+        if(uri == null) {
+            uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        }
+
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, MediaStore.Images.Media.DATE_MODIFIED + " desc");
+        if(cursor == null || cursor.getColumnCount() <1 ) {
+            return null;
+        }
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+
+        String path = cursor.getString(column_index);
+
+        if(cursor != null) {
+            cursor.close();
+            cursor = null;
+        }
+
+        return new File(path);
     }
 }

@@ -34,14 +34,12 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="0dp"/>
-        <ImageView
-            android:layout_gravity="center"
+        <Button
+            android:id="@+id/btn_show_detail"
+            android:background="@color/white"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:id="@+id/Btn_report"
-            android:layout_marginRight="20dp"
-            android:src="@drawable/ic_baseline_more_horiz_24"/>
+            android:layout_height="match_parent"
+            android:text="내용 보기"/>
     </LinearLayout>
 
     <ScrollView
@@ -49,7 +47,7 @@
         android:id="@+id/layout_debate_info"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.7">
+        android:layout_weight="0.3">
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -162,6 +160,40 @@
             android:background="@drawable/ic_baseline_close_24"
             android:id="@+id/btn_tag_close"/>
     </LinearLayout>
+
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/layout_img_attach"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Button
+                android:layout_marginLeft="10dp"
+                android:layout_gravity="center"
+                android:id="@+id/btn_img_attach_close"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@drawable/ic_baseline_close_24"/>
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+            <Button
+                android:id="@+id/btn_send_img"
+                android:layout_width="70dp"
+                android:text="전송"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <ImageView
+            android:layout_gravity="center"
+            android:id="@+id/Img_attach_img"
+            android:layout_width="match_parent"
+            android:layout_height="230dp"/>
+    </LinearLayout>
     <LinearLayout
         android:id="@+id/message_layout"
         android:paddingVertical="3dp"
@@ -169,10 +201,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <ImageView
+            android:id="@+id/btn_img_attach"
+            android:clickable="true"
             android:padding="5dp"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:src="@drawable/ic_baseline_chat_bubble_24"/>
+            android:src="@drawable/ic_baseline_add_24"/>
 
         <EditText
             android:id="@+id/Ev_message_content"

@@ -21,6 +21,8 @@ import com.example.toron.Debate.Debate_room;
 import com.example.toron.R;
 import com.example.toron.Service.Class.Chat;
 import com.example.toron.Service.Class.Room_data;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -82,6 +84,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         String msg = chat.getMsg();
         String nickname = chat.getNickname();
         String side = chat.getSide();
+        String mode = chat.getChat_mode();
+        String img_href = chat.getImg_href();
 
 
         String time_data = chat.getDatetime();
@@ -99,21 +103,48 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
 
         if (holder instanceof AHolder) { //A가 남이다.
-            ((AHolder) holder).content.setText(msg);
+            //말풍선 색깔
+            if (side.equals("con")) ((AHolder) holder).layout_other.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FDD7D7"))); //반대
+            else ((AHolder) holder).layout_other.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#D7DCFD"))); //찬성
 
-            if (side.equals("con")) ((AHolder) holder).content.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FDD7D7"))); //반대
-            else ((AHolder) holder).content.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#D7DCFD"))); //찬성
+            // 채팅일 때
+            if(chat.getChat_mode().equals("msg")){
+                ((AHolder) holder).content.setVisibility(View.VISIBLE);
+                ((AHolder) holder).content.setText(msg); // 글씨 보이고
+                ((AHolder) holder).Img_message.setVisibility(View.GONE); //그림 안보이고
+            }
+            else if(chat.getChat_mode().equals("local_img")){
+                ((AHolder) holder).content.setVisibility(View.GONE);
+                ((AHolder) holder).Img_message.setImageURI(Uri.parse(img_href)); // 글씨 보이고
+                ((AHolder) holder).Img_message.setVisibility(View.VISIBLE); //그림 안보이고
+            }
+            else if(chat.getChat_mode().equals("img")){
+                ((AHolder) holder).content.setVisibility(View.GONE);
+                ((AHolder) holder).Img_message.setVisibility(View.VISIBLE); //그림 안보이고
+                String url = "http://49.247.195.99/storage/chat_img/" + img_href;
+                Log.d(TAG,url);
+                Picasso.get().invalidate(url);
+                Picasso.get().load(url).placeholder(R.drawable.ic_baseline_image_24).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).error(R.drawable.ic_baseline_image_24).into(((AHolder) holder).Img_message);
+
+                ((AHolder) holder).Img_message.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        debate_room.open_img(url);
+                    }
+                });
+            }
+
+
+            //공통
             ((AHolder) holder).nickname.setText(nickname);
             ((AHolder) holder).datetime.setText(datetime);
-
             ((AHolder) holder).profile.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     debate_room.set_TagMode(chat.getUser_idx(),nickname);
                 }
             }); // 태그의 경우 한번 클릭
-
-            ((AHolder) holder).content.setOnLongClickListener(new View.OnLongClickListener() {
+            ((AHolder) holder).layout_other.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
                     Toast.makeText(debate_room,"long click",Toast.LENGTH_SHORT).show();
@@ -121,35 +152,59 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 }
             }); // 신고, 좋아요의 경우 Long button
             // 이미지는 서버에서 가져온다
-            Picasso.get()
-                    .load(imageStr)
-                    .error(R.drawable.ic_baseline_account_circle_24)
-                    .into(((AHolder) holder).profile);
 
+            Picasso.get().invalidate(imageStr);
+            Picasso.get().load(imageStr).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).error(R.drawable.ic_baseline_account_circle_24).into(((AHolder) holder).profile);
         } else {
-            ((BHolder) holder).content.setText(msg);
+            //말풍선 색깔
+            if (side.equals("con")) ((BHolder) holder).layout_my.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FDD7D7"))); //반대
+            else ((BHolder) holder).layout_my.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#D7DCFD"))); //찬성
 
-            if (side.equals("con")) ((BHolder) holder).content.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FDD7D7"))); //반대
-            else ((BHolder) holder).content.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#D7DCFD"))); // 찬성
+            // 채팅일 때
+            if(chat.getChat_mode().equals("msg")){
+                ((BHolder) holder).content.setVisibility(View.VISIBLE);
+                ((BHolder) holder).content.setText(msg); // 글씨 보이고
+                ((BHolder) holder).Img_message.setVisibility(View.GONE); //그림 안보이고
+            }
+            else if(chat.getChat_mode().equals("local_img")){
+                ((BHolder) holder).content.setVisibility(View.GONE);
+                ((BHolder) holder).Img_message.setImageURI(Uri.parse(img_href)); // 글씨 보이고
+                Log.d(TAG,img_href);
+                ((BHolder) holder).Img_message.setVisibility(View.VISIBLE); //그림 안보이고
+            }
+            else if(chat.getChat_mode().equals("img")){
+                ((BHolder) holder).content.setVisibility(View.GONE);
+                ((BHolder) holder).Img_message.setVisibility(View.VISIBLE); //그림 안보이고
+                String url = "http://49.247.195.99/storage/chat_img/" + img_href;
+                Log.d(TAG,url);
+
+                Picasso.get().invalidate(url);
+                Picasso.get().load(url).placeholder(R.drawable.ic_baseline_image_24).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).error(R.drawable.ic_baseline_image_24).into(((BHolder) holder).Img_message);
+            }
+
+
+            //공통
             ((BHolder) holder).nickname.setText(nickname);
             ((BHolder) holder).datetime.setText(datetime);
-
-            // 내 이미지는 로컬에서 가져온다
-//            String uristr = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Toron/Storage/Image/profile_img.jpg";
-//            File files = new File(uristr);
-//            if(files.exists()==true) {
-//                Uri uri = Uri.parse(uristr);
-//                ((BHolder) holder).profile.setImageURI(uri);
-//            } else {
-//                ((BHolder) holder).profile.setImageResource(R.mipmap.ic_launcher_round);
-//            }.
+            ((BHolder) holder).profile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    debate_room.set_TagMode(chat.getUser_idx(),nickname);
+                }
+            }); // 태그의 경우 한번 클릭
+            ((BHolder) holder).layout_my.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    Toast.makeText(debate_room,"long click",Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+            }); // 신고, 좋아요의 경우 Long button
             // 이미지는 서버에서 가져온다
-            Picasso.get()
-                    .load(imageStr)
-                    .error(R.drawable.ic_baseline_account_circle_24)
-                    .into(((BHolder) holder).profile);
-        }
 
+            // 프로필 이미지
+            Picasso.get().invalidate(imageStr);
+            Picasso.get().load(imageStr).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).error(R.drawable.ic_baseline_account_circle_24).into(((BHolder) holder).profile);
+        }
     }
 
     private Chat getChat(int position) {
@@ -176,6 +231,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         TextView nickname;
         TextView datetime;
         ImageView profile;
+        ImageView Img_message;
+        LinearLayout layout_other;
 
 
         public AHolder(View view) {
@@ -184,6 +241,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             nickname = (TextView) view.findViewById(R.id.Tv_user_name);
             datetime = (TextView) view.findViewById(R.id.Tv_datetime);
             profile = (ImageView) view.findViewById(R.id.Img_userprofile);
+            Img_message = (ImageView) view.findViewById(R.id.Img_message);
+            layout_other = (LinearLayout) view.findViewById(R.id.layout_other);
         }
     }
 
@@ -193,14 +252,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         TextView nickname;
         ImageView profile;
         TextView datetime;
+        ImageView Img_message;
+        LinearLayout layout_my;
 
 
         public BHolder(View view) {
             super(view);
+            layout_my = (LinearLayout) view.findViewById(R.id.layout_my);
             content = (TextView) view.findViewById(R.id.Tv_message);
             nickname = (TextView) view.findViewById(R.id.Tv_user_name);
             datetime = (TextView) view.findViewById(R.id.Tv_datetime);
             profile = (ImageView) view.findViewById(R.id.Img_userprofile);
+            Img_message = (ImageView) view.findViewById(R.id.Img_message);
         }
     }
 }

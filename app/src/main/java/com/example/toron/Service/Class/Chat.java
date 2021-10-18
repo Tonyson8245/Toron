@@ -1,6 +1,7 @@
 package com.example.toron.Service.Class;
 
 public class Chat {
+    String chat_mode;
     String chat_idx;
     String room_idx;
     String msg;
@@ -9,6 +10,15 @@ public class Chat {
     String side;
     String nickname;
     String tag_user_idx;
+    String img_href;
+
+    public String getChat_mode() {
+        return chat_mode;
+    }
+
+    public void setChat_mode(String chat_mode) {
+        this.chat_mode = chat_mode;
+    }
 
     public String getChat_idx() {
         return chat_idx;
@@ -74,7 +84,16 @@ public class Chat {
         this.tag_user_idx = tag_user_idx;
     }
 
-    public Chat(String chat_idx, String room_idx, String msg, String user_idx, String datetime, String side, String nickname, String tag_user_idx) {
+    public String getImg_href() {
+        return img_href;
+    }
+
+    public void setImg_href(String img_href) {
+        this.img_href = img_href;
+    }
+
+    public Chat(String chat_mode, String chat_idx, String room_idx, String msg, String user_idx, String datetime, String side, String nickname, String tag_user_idx, String img_href) {
+        this.chat_mode = chat_mode;
         this.chat_idx = chat_idx;
         this.room_idx = room_idx;
         this.msg = msg;
@@ -83,5 +102,6 @@ public class Chat {
         this.side = side;
         this.nickname = nickname;
         this.tag_user_idx = tag_user_idx;
+        this.img_href = img_href;
     }
 }

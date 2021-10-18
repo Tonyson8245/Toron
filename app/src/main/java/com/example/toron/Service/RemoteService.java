@@ -78,6 +78,7 @@ public class RemoteService extends Service {
     public static final int MSG_SEND_MSG = 7;
     public static final int MSG_GET_CHAT = 8;
     public static final int MSG_CHECK_ACTIVITY = 9;
+    public static final int MSG_SEND_IMG = 10;
     String user_idx;
     NotificationChannel notificationChannel_chat;
 
@@ -198,6 +199,9 @@ public class RemoteService extends Service {
                     break;
                 case MSG_CHECK_ACTIVITY:
                     get_chat(msg);
+                    break;
+                case MSG_SEND_IMG:
+                    request_send_img(msg);
                     break;
             }
         }
@@ -335,11 +339,28 @@ public class RemoteService extends Service {
         String side = bundle.getString("side");
         String tag_user_idx = bundle.getString("tag_user_idx");
 
-        Chat chat = new Chat("",room_idx,msg,user_idx,datetime,side,"",tag_user_idx); // 닉네임이랑 chat_idx 는 서버에서 넣어준다. 왜 이딴 식으로 짰는지 참..
+        Chat chat = new Chat("msg","",room_idx,msg,user_idx,datetime,side,"",tag_user_idx,""); // 닉네임이랑 chat_idx 는 서버에서 넣어준다. 왜 이딴 식으로 짰는지 참..
         Request request = new Request("CHAT",gson.toJson(chat));
         SendToServerThread sendToServerThread = new SendToServerThread(socket,gson.toJson(request));
         sendToServerThread.start();
         Log.d(TAG,"request_send_msg");
+    }
+
+    public void request_send_img(Message message){
+        Bundle bundle = (Bundle) message.obj;
+        String msg = bundle.getString("msg");
+        String room_idx = bundle.getString("room_idx");
+        String user_idx = bundle.getString("user_idx");
+        String datetime = bundle.getString("datetime");
+        String side = bundle.getString("side");
+        String tag_user_idx = bundle.getString("tag_user_idx");
+        String img_href = bundle.getString("img_href");
+
+        Chat chat = new Chat("img","",room_idx,msg,user_idx,datetime,side,"",tag_user_idx,img_href); // 닉네임이랑 chat_idx 는 서버에서 넣어준다. 왜 이딴 식으로 짰는지 참..
+        Request request = new Request("CHAT",gson.toJson(chat));
+        SendToServerThread sendToServerThread = new SendToServerThread(socket,gson.toJson(request));
+        sendToServerThread.start();
+        Log.d(TAG,"request_send_chat_img");
     }
 
     void createNotification(String channelId, int id, String title,String nickname, String text){

@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,9 +18,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.example.toron.Adapter.ChatAdapter;
 import com.example.toron.Mypage.Mypage_main;
 import com.example.toron.Mypage.Profile_setting;
 import com.example.toron.R;
+import com.squareup.picasso.Cache;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
@@ -27,10 +32,13 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 
 public class Mypage_fragment extends Fragment {
+    private static final String TAG = "Mypage_fragment";
     TextView Tv_user_nickname,Tv_profile_setting;
     ImageView img_profile;
 
     String user_idx,user_id,user_nickname;
+    private Picasso picasso;
+    private LruCache picassoLruCache;
 
     @Nullable
     @Override
@@ -49,6 +57,7 @@ public class Mypage_fragment extends Fragment {
                 startActivity(profile_setting);
             }
         });
+
         return view;
     }
     @Override
@@ -68,7 +77,13 @@ public class Mypage_fragment extends Fragment {
         super.onAttach(context);
     }
 
+
+
+
+
+
     void get_userdata(Context context){
+
         img_profile.setImageResource(R.mipmap.ic_launcher_round);
 
         SharedPreferences sharedPreferences;
@@ -79,22 +94,10 @@ public class Mypage_fragment extends Fragment {
         Tv_user_nickname.setText(user_nickname);
         String url = "http://49.247.195.99/storage/profile_img/" + user_idx + ".jpg";
 
-        Log.d("Mypage_main",url);
-        try{
-            Picasso.get().load(url).into(img_profile);
-        }catch (Exception e){
-            img_profile.setImageResource(R.mipmap.ic_launcher_round);
-        }
+        Log.d("123Mypage_main",url);
 
-//        String uristr = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Toron/Storage/Image/profile_img.jpg";
-//
-//        File files = new File(uristr);
-//        if(files.exists()==true) {
-//            Uri uri = Uri.parse(uristr);
-//            img_profile.setImageURI(uri);
-//        } else {
-//            img_profile.setImageResource(R.mipmap.ic_launcher_round);
-//        }
+        Picasso.get().invalidate(url);
+        Picasso.get().load(url).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_profile);
+//        Picasso.get().load(url);
     }
-
 }
