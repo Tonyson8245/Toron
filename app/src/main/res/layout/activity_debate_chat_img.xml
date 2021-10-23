@@ -22,6 +22,17 @@
             android:id="@+id/btn_back"
             android:backgroundTint="@color/white"
             android:background="@drawable/ic_baseline_arrow_back_ios_24"/>
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+        <Button
+            android:id="@+id/btn_img_download"
+            android:background="@drawable/ic_baseline_arrow_circle_down_24"
+            android:layout_width="40dp"
+            android:layout_margin="5dp"
+            android:layout_gravity="center"
+            android:layout_height="40dp"/>
     </LinearLayout>
     <ImageView
         android:id="@+id/Img_chat"

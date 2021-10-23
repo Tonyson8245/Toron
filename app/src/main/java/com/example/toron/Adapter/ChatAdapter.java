@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,25 +12,24 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.toron.Class.PicassoTransformation;
 import com.example.toron.Debate.Debate_room;
 import com.example.toron.R;
 import com.example.toron.Service.Class.Chat;
-import com.example.toron.Service.Class.Room_data;
-import com.squareup.picasso.MemoryPolicy;
-import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
+//import com.squareup.picasso.MemoryPolicy;
+//import com.squareup.picasso.NetworkPolicy;
+//import com.squareup.picasso.Picasso;
 
-import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -115,16 +113,26 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
             else if(chat.getChat_mode().equals("local_img")){
                 ((AHolder) holder).content.setVisibility(View.GONE);
-                ((AHolder) holder).Img_message.setImageURI(Uri.parse(img_href)); // 글씨 보이고
                 ((AHolder) holder).Img_message.setVisibility(View.VISIBLE); //그림 안보이고
+                Picasso.get().load(img_href).placeholder(R.drawable.ic_baseline_image_24).into(((AHolder) holder).Img_message);
             }
             else if(chat.getChat_mode().equals("img")){
                 ((AHolder) holder).content.setVisibility(View.GONE);
                 ((AHolder) holder).Img_message.setVisibility(View.VISIBLE); //그림 안보이고
                 String url = "http://49.247.195.99/storage/chat_img/" + img_href;
                 Log.d(TAG,url);
-                Picasso.get().invalidate(url);
-                Picasso.get().load(url).placeholder(R.drawable.ic_baseline_image_24).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).error(R.drawable.ic_baseline_image_24).into(((AHolder) holder).Img_message);
+
+                Picasso.get().load(url).placeholder(R.drawable.ic_baseline_image_24).into(((AHolder) holder).Img_message, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        debate_room.toBottom(false);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+
+                    }
+                });
 
                 ((AHolder) holder).Img_message.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -147,14 +155,15 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             ((AHolder) holder).layout_other.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    Toast.makeText(debate_room,"long click",Toast.LENGTH_SHORT).show();
+                    debate_room.open_dialog(list.get(position).getChat_idx(),side);
                     return false;
                 }
             }); // 신고, 좋아요의 경우 Long button
             // 이미지는 서버에서 가져온다
 
             Picasso.get().invalidate(imageStr);
-            Picasso.get().load(imageStr).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).error(R.drawable.ic_baseline_account_circle_24).into(((AHolder) holder).profile);
+//            Picasso.get().load(imageStr).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).error(R.drawable.ic_baseline_account_circle_24).into(((AHolder) holder).profile);
+            Picasso.get().load(imageStr).into(((AHolder) holder).profile);
         } else {
             //말풍선 색깔
             if (side.equals("con")) ((BHolder) holder).layout_my.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FDD7D7"))); //반대
@@ -178,8 +187,17 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 String url = "http://49.247.195.99/storage/chat_img/" + img_href;
                 Log.d(TAG,url);
 
-                Picasso.get().invalidate(url);
-                Picasso.get().load(url).placeholder(R.drawable.ic_baseline_image_24).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).error(R.drawable.ic_baseline_image_24).into(((BHolder) holder).Img_message);
+                Picasso.get().load(url).placeholder(R.drawable.ic_baseline_image_24).into(((BHolder) holder).Img_message, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        debate_room.toBottom(false);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+
+                    }
+                });
             }
 
 
@@ -192,18 +210,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     debate_room.set_TagMode(chat.getUser_idx(),nickname);
                 }
             }); // 태그의 경우 한번 클릭
-            ((BHolder) holder).layout_my.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    Toast.makeText(debate_room,"long click",Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-            }); // 신고, 좋아요의 경우 Long button
             // 이미지는 서버에서 가져온다
 
             // 프로필 이미지
             Picasso.get().invalidate(imageStr);
-            Picasso.get().load(imageStr).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).error(R.drawable.ic_baseline_account_circle_24).into(((BHolder) holder).profile);
+//            Picasso.get().load(imageStr).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).error(R.drawable.ic_baseline_account_circle_24).into(((BHolder) holder).profile);
+            Picasso.get().load(imageStr).into(((BHolder) holder).profile);
         }
     }
 

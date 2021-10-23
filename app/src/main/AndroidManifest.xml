@@ -24,8 +24,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Debate.Debate_chat_img"></activity>
-        <activity android:name=".Debate.Debate_SelectSide"></activity>
+        <activity android:name=".Vote.Vote_history"></activity>
+        <activity android:name=".Debate.Debate_chat_img" />
+        <activity android:name=".Debate.Debate_SelectSide" />
         <activity android:name=".News.Search_news" />
         <activity android:name=".News.News_detail" />
         <activity android:name=".Mypage.Change_phonenum" />
@@ -56,7 +57,7 @@
         </activity>
         <activity
             android:name=".Main.Mainpage"
-            android:launchMode="singleTop"></activity>
+            android:launchMode="singleTop" />
 
         <service
             android:name=".Service.RemoteService"

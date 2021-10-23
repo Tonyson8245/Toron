@@ -12,6 +12,22 @@ public class Room_data {
     String member_qty;
     String category;
     ArrayList<New_article> cons;
+
+    @Override
+    public String toString() {
+        return "Room_data{" +
+                "user_maker='" + user_maker + '\'' +
+                ", start_date='" + start_date + '\'' +
+                ", room_subject='" + room_subject + '\'' +
+                ", room_description='" + room_description + '\'' +
+                ", chat_qty='" + chat_qty + '\'' +
+                ", member_qty='" + member_qty + '\'' +
+                ", category='" + category + '\'' +
+                ", cons=" + cons +
+                ", pros=" + pros +
+                '}';
+    }
+
     ArrayList<New_article> pros;
 
     public String getUser_maker() {

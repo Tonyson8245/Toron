@@ -85,4 +85,9 @@ public class New_article {
         this.news_img = news_img;
         this.news_idx = news_idx;
     }
+
+    public New_article(String news_href, String news_title) {
+        this.news_href = news_href;
+        this.news_title = news_title;
+    }
 }

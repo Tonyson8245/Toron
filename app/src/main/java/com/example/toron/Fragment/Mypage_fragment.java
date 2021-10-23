@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.LruCache;
 import android.view.LayoutInflater;
@@ -16,13 +15,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.toron.Adapter.ChatAdapter;
 import com.example.toron.Mypage.Mypage_main;
 import com.example.toron.Mypage.Profile_setting;
 import com.example.toron.R;
-import com.squareup.picasso.Cache;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
@@ -37,10 +36,7 @@ public class Mypage_fragment extends Fragment {
     ImageView img_profile;
 
     String user_idx,user_id,user_nickname;
-    private Picasso picasso;
-    private LruCache picassoLruCache;
 
-    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_mypage_main, container, false);
@@ -97,7 +93,7 @@ public class Mypage_fragment extends Fragment {
         Log.d("123Mypage_main",url);
 
         Picasso.get().invalidate(url);
-        Picasso.get().load(url).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_profile);
-//        Picasso.get().load(url);
+//        Picasso.get().load(url).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_profile);
+        Picasso.get().load(url).into(img_profile);
     }
 }

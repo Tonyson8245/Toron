@@ -1,16 +1,19 @@
 package com.example.toron.News;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.toron.Adapter.NewsRecyclerAdapter;
 import com.example.toron.Adapter.SearchRecyclerAdapter;
@@ -20,7 +23,6 @@ import com.example.toron.Retrofit.Class.Search_news_img;
 import com.example.toron.Retrofit.Class.Search_news_item;
 import com.example.toron.Retrofit.Class.Search_news_response;
 import com.example.toron.Retrofit.Interface.NewsInterface;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,18 +36,26 @@ public class Search_news extends AppCompatActivity {
     String TAG = "!!!Search_news";
     Button btn_back,btn_search_news;
     EditText Ev_search_news_keyword;
-    String keyword;
+    String keyword,mode="search";
 
     List<Search_news_item> list = new ArrayList<Search_news_item>();
     int start=0;
     private LinearLayoutManager mLayoutManager;
     private RecyclerView recyclerView;
     private SearchRecyclerAdapter searchRecyclerAdapter;
+    int ATTACH_MODE = 11;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_news);
+
+        /// 첨부 쪽에서 건너온 녀석인지 확인
+        Intent getData = getIntent();
+        if(!TextUtils.isEmpty(getData.getStringExtra("mode"))){
+            mode = getData.getStringExtra("mode");
+        }
+
 
         btn_search_news = findViewById(R.id.btn_search_news);
         btn_back = findViewById(R.id.btn_back);
@@ -83,8 +93,6 @@ public class Search_news extends AppCompatActivity {
                 }
             }
         });
-
-
     }
 
     void search_News(String keyword, String start){
@@ -114,6 +122,24 @@ public class Search_news extends AppCompatActivity {
         news_detail.putExtra("img",img);
         news_detail.putExtra("writing","");
         news_detail.putExtra("datetime","");
-        startActivity(news_detail);
+        if(mode.equals("attach")){
+            news_detail.putExtra("mode","attach");
+            startActivityForResult(news_detail,ATTACH_MODE);
+        }
+        else startActivity(news_detail);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode==RESULT_OK){
+            switch (requestCode) {
+                case 11: {
+                    Log.d(TAG,"ㅇ닝ㄴ");
+                    setResult(RESULT_OK, data);
+                    finish();
+                }
+            }
+        }
     }
 }

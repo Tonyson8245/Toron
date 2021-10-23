@@ -2,50 +2,35 @@ package com.example.toron.Adapter;
 
 import android.content.Context;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.toron.Debate.Debate_SelectSide;
-import com.example.toron.Main.Mainpage;
+import com.example.toron.Debate.Debate_room;
 import com.example.toron.R;
 import com.example.toron.Retrofit.Class.New_article;
-import com.example.toron.Vote.Vote_history;
 
 import java.util.List;
 
-public class AttachArticleRecyclerAdapter extends RecyclerView.Adapter<AttachArticleRecyclerAdapter.ViewHolder> {
+public class AttachArticleRecyclerAdapter_room extends RecyclerView.Adapter<AttachArticleRecyclerAdapter_room.ViewHolder> {
 
-    private Vote_history vote_history;
-    private Debate_SelectSide debate_selectSide;
-
+    private Debate_room debate_room;
     private Context context;
     private List<New_article> List;
-    String TAG ="AttachArticleRecyclerAdapter";
 
-    public AttachArticleRecyclerAdapter(Context context, java.util.List<New_article> list) {
+    public AttachArticleRecyclerAdapter_room(Context context, java.util.List<New_article> list) {
         this.context = context;
-        try {
-           this.vote_history = (Vote_history) context;
-        }catch (ClassCastException e){
-           this.debate_selectSide = (Debate_SelectSide) context;
-        }
+        this.debate_room = (Debate_room) context;
         List = list;
     }
 
-    public AttachArticleRecyclerAdapter(Context context) {
+    public AttachArticleRecyclerAdapter_room(Context context) {
         this.context = context;
-        try {
-            this.vote_history = (Vote_history) context;
-        }catch (ClassCastException e){
-            this.debate_selectSide = (Debate_SelectSide) context;
-        }
     }
 
     public void setList(java.util.List<New_article> list) {
@@ -62,6 +47,13 @@ public class AttachArticleRecyclerAdapter extends RecyclerView.Adapter<AttachArt
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.onBind(List.get(position));
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                debate_room.MoveToArticle(List.get(position).getNews_href());
+            }
+        });
     }
 
     public void set_Newslist(List<New_article> list){
@@ -80,25 +72,12 @@ public class AttachArticleRecyclerAdapter extends RecyclerView.Adapter<AttachArt
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+
             title = (TextView) itemView.findViewById(R.id.title);
-
-
         }
 
         void onBind(New_article article){
-            title.setText("▶ " + Html.fromHtml(article.getNews_title()).toString());
-
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    try {
-                        vote_history.MoveToArticle(article.getNews_href());
-                    }catch (ClassCastException e){
-                        debate_selectSide.MoveToArticle(article.getNews_href());
-                    }
-
-                }
-            });
+            title.setText(Html.fromHtml(article.getNews_title()).toString());
         }
     }
 

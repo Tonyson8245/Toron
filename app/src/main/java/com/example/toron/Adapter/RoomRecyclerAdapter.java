@@ -30,6 +30,7 @@ public class RoomRecyclerAdapter extends RecyclerView.Adapter<RoomRecyclerAdapte
     private Mainpage mainpage;
     private Context context;
     private List<Room_data> List;
+    String TAG = "RoomAdapter";
 
     public RoomRecyclerAdapter(Context context, java.util.List<Room_data> list) {
         this.context = context;
@@ -64,7 +65,7 @@ public class RoomRecyclerAdapter extends RecyclerView.Adapter<RoomRecyclerAdapte
         ImageView Img_profile_img;
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         SimpleDateFormat new_format = new SimpleDateFormat("yyyy-MM-dd");
-        String end_day;
+        String end_day,maker_idx,maker_nickname;
         String start_day;
         Button btn_enter;
 
@@ -106,16 +107,25 @@ public class RoomRecyclerAdapter extends RecyclerView.Adapter<RoomRecyclerAdapte
                 e.printStackTrace();
             }
 
+
+            String[] maker_data = room_data.getUser_maker().split("/",2);
+            maker_idx = maker_data[0];
+            maker_nickname = maker_data[1];
+
+
             Tv_End_date.setText(end_day);
             Tv_Start_date.setText(start_day);
-            Tv_nickname.setText(room_data.getUser_maker());
+            Tv_nickname.setText(maker_nickname);
             Tv_room_description.setText(room_data.getRoom_description());
             Tv_room_subject.setText(room_data.getRoom_subject());
             Tv_participate_num.setText(room_data.getMember_qty());
             Tv_message_num.setText(room_data.getChat_qty());
 
             try{
-                Picasso.get().load("http://49.247.195.99/storage/profile_img/"+room_data.getUser_maker()+".jpg");
+                String url = "http://49.247.195.99/storage/profile_img/"+maker_idx+".jpg";
+                Picasso.get().load(url).into(Img_profile_img);
+                Log.d(TAG,url);
+
             }catch (Exception e){
                 Img_profile_img.setImageResource(R.drawable.ic_baseline_image_24);
                 Img_profile_img.setPadding(20,20,20,20);

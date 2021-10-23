@@ -1,5 +1,6 @@
 package com.example.toron.Retrofit.Interface;
 
+import com.example.toron.Retrofit.Class.Result;
 import com.example.toron.Retrofit.Class.Room_data;
 import com.example.toron.Retrofit.Class.Room_idx;
 import com.example.toron.Retrofit.Class.Userdata_response;
@@ -34,4 +35,28 @@ public interface DebateInterface {
             @Query("user_idx") String user_idx,
             @Query("side") String side
     );
+
+    @GET("api/Debate/Insert_chat_report1.php")
+    Call<Result> insert_chat_report(
+            @Query("chat_idx") String chat_idx,
+            @Query("user_idx") String user_idx
+    );
+
+    @GET("api/Debate/Insert_chat_like.php")
+    Call<Result> insert_chat_like(
+            @Query("chat_idx") String chat_idx,
+            @Query("user_idx") String user_idx,
+            @Query("room_idx") String room_idx,
+            @Query("side") String side
+    );
+
+    @FormUrlEncoded
+    @POST("api/Debate/Insert_article_list.php")
+    Call<Result> Insert_article_list(
+            @Field("side") String side,
+            @Field("room_idx") String room_idx,
+            @Field("title") String title,
+            @Field("href") String href
+    );
+
 }

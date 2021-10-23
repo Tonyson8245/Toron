@@ -68,7 +68,8 @@ public class Mypage_main extends AppCompatActivity {
         Log.d("Mypage_main",url);
         try{
             Picasso.get().invalidate(url);
-            Picasso.get().load(url).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_profile);
+//            Picasso.get().load(url).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_profile);
+            Picasso.get().load(url).into(img_profile);
         }catch (Exception e){
             img_profile.setImageResource(R.mipmap.ic_launcher_round);
         }

@@ -111,7 +111,7 @@ public class RemoteService extends Service {
         super.onStartCommand(intent, flags, startId);
         //immortal service
         serviceIntent = intent; // 메인 액티비티에서 전달받은 인텐트 대입
-        showToast(getApplication(), "Start Service"); // 서비스 시작 토스트
+//        showToast(getApplication(), "Start Service"); // 서비스 시작 토스트
 
         start_connect(user_idx);
         Log.d(TAG,"부활!!");
@@ -132,12 +132,13 @@ public class RemoteService extends Service {
     @Override
     public void onDestroy() { // 종료시 (=서비스가 꺼질 상황이 발생 시)
         super.onDestroy();
+        setAlarmTimer(); // 여기서 알람을 만든다.
+
         Request request = new Request("QUIT",null);
         SendToServerThread sendToServerThread = new SendToServerThread(socket,gson.toJson(request));
         sendToServerThread.start(); // 채팅 연결 종료
 
         serviceIntent = null; // 서비스 인텐트 null
-        setAlarmTimer(); // 여기서 알람을 만든다.
         Thread.currentThread().interrupt(); // 서비스 쓰레드를 인터럽트 시켜서 더이상 작동이 안되게 한다. 이러면 null 이 될거다.
 
         if (messageThread != null) { // mainThread 도 종료 시킨다.
@@ -149,7 +150,7 @@ public class RemoteService extends Service {
     protected void setAlarmTimer() {
         final Calendar c = Calendar.getInstance(); // 캘린더변수 생성
         c.setTimeInMillis(System.currentTimeMillis()); // 현재 시간
-        c.add(Calendar.MILLISECOND, 100); // 현재시간 + 1초
+        c.add(Calendar.MILLISECOND, 1); // 현재시간 + 1초
         Log.d("!!!time",c.getTime().toString());
         Intent intent = new Intent(this, AlarmReceiver.class); // 알람 리시버에 보낼 인텐트 생성
         intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -171,7 +172,6 @@ public class RemoteService extends Service {
                     break;
                 case MSG_CLIENT_DISCONNECT:
                     Log.d(TAG, "Received MSG_CLIENT_DISCONNECT message from client");
-                    mClientCallbacks = null;
                     break;
                 case MSG_ADD_VALUE:
                     Log.d(TAG, "Received message from client: MSG_ADD_VALUE");
@@ -292,7 +292,7 @@ public class RemoteService extends Service {
         }
         else{
             if(chat.getTag_user_idx()!=null) {
-                if (chat.getTag_user_idx().equals(user_idx))  sendNotification_outapp(chat.getRoom_idx(), "TORON",chat.getNickname(), chat.getMsg(),chat.getChat_idx());
+                if (chat.getTag_user_idx().equals(user_idx))  sendNotification_outapp(chat.getRoom_idx(), "TORON",chat.getNickname(), chat.getMsg(),chat.getChat_idx(), chat.getChat_mode());
             }
         }
     } // 액티비티로 채팅 보내주기 ,  노티 아니면 문자 추가
@@ -314,12 +314,12 @@ public class RemoteService extends Service {
         }
         else {
             Chat chat = gson.fromJson(data,Chat.class);
-            sendNotification_outapp(chat.getRoom_idx(), "TORON",chat.getNickname(), chat.getMsg(),chat.getChat_idx());
+            sendNotification_outapp(chat.getRoom_idx(), "TORON",chat.getNickname(), chat.getMsg(),chat.getChat_idx(), chat.getChat_mode());
         }
     }
 
     public void create_notify(Chat chat){
-        sendNotification_inapp(chat.getRoom_idx(),"TORON",chat.getNickname(), chat.getMsg(),chat.getChat_idx());
+        sendNotification_inapp(chat.getRoom_idx(),"TORON",chat.getNickname(), chat.getMsg(),chat.getChat_idx(), chat.getChat_mode());
     }
 
     public void request_chat_list(Integer room_idx){
@@ -376,7 +376,7 @@ public class RemoteService extends Service {
         notificationManager.notify(id, builder.build());
     }
 
-    private void sendNotification_inapp(String room_idx, String title,String nickname, String text,String tag_chat_idx) { //todo 나중에 수정해라
+    private void sendNotification_inapp(String room_idx, String title,String nickname, String text,String tag_chat_idx,String mode) { //todo 나중에 수정해라
         showToast(this.getApplication(),"inapp");
         Intent resultIntent = new Intent(this, Debate_room.class);
         resultIntent.putExtra("room_idx",room_idx);
@@ -384,7 +384,7 @@ public class RemoteService extends Service {
         resultIntent.setAction(Intent.ACTION_MAIN);
         resultIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
+        if(mode.equals("img")) text = "사진";
 //        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
 //        stackBuilder.addParentStack(Debate_room.class);
 //        stackBuilder.addNextIntent(resultIntent);
@@ -428,7 +428,7 @@ public class RemoteService extends Service {
 
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build()); // 노티피케이션
     } // 앱이 켜졌을때 울리는 notification
-    private void sendNotification_outapp(String room_idx, String title,String nickname, String text,String tag_chat_idx) { //todo 나중에 수정해라
+    private void sendNotification_outapp(String room_idx, String title,String nickname, String text,String tag_chat_idx,String mode) { //todo 나중에 수정해라
 
         showToast(this.getApplication(),"outapp");
 
@@ -441,6 +441,7 @@ public class RemoteService extends Service {
         stackBuilder.addNextIntent(resultIntent);
 
         PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        if(mode.equals("img")) text = "사진";
 
 //        Intent intent = new Intent(this, Debate_room.class); // 메인 액티비티로 가는 인텐트
 //        intent.putExtra("room_idx",room_idx);

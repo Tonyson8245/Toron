@@ -32,6 +32,7 @@ import com.example.toron.Fragment.Vote_fragment;
 import com.example.toron.News.News_detail;
 import com.example.toron.R;
 import com.example.toron.Service.RemoteService;
+import com.example.toron.Vote.Vote_history;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import javax.security.auth.callback.CallbackHandler;
@@ -91,7 +92,7 @@ public class Mainpage extends AppCompatActivity {
             startService(serviceIntent); // 서비스 실행
         } else {  //기존 서비스가 있다면
             serviceIntent = RemoteService.serviceIntent;//getInstance().getApplication(); // 서비스의 인텐트를 가져와서 메인 서비스에 다시 설정
-            Toast.makeText(getApplicationContext(), "already", Toast.LENGTH_LONG).show(); // 이미 돌고 있다는 토스트 띄운다.
+//            Toast.makeText(getApplicationContext(), "already", Toast.LENGTH_LONG).show(); // 이미 돌고 있다는 토스트 띄운다.
         }
     }
 
@@ -253,4 +254,12 @@ public class Mainpage extends AppCompatActivity {
             Log.d(TAG, "Send MSG_CLIENT_DISCONNECT message to Service");
         }
     }
+
+    public void moveToHistory(String vote_idx) {
+        Toast.makeText(this,"토론 기록으로 이동합니다.",Toast.LENGTH_SHORT).show();
+        Intent history = new Intent(Mainpage.this, Vote_history.class);
+        history.putExtra("vote_idx",vote_idx);
+        startActivity(history);
+    }
+
 }

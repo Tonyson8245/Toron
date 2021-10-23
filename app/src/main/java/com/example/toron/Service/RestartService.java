@@ -8,8 +8,8 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import com.example.toron.Main.Mainpage;
@@ -34,7 +34,7 @@ public class RestartService extends Service { // 알람이 실행 됬을때 시�
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "default"); // 노티피케이션 제작
         builder.setSmallIcon(R.mipmap.ic_launcher);
-        builder.setContentTitle("부활");
+        builder.setContentTitle("");
         Intent notificationIntent = new Intent(this, Mainpage.class); // 인텐트 생성
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0); // pending 인텐트 생성
         builder.setContentIntent(pendingIntent); // 노티피케이션 안에 pending intent 포함
@@ -45,7 +45,7 @@ public class RestartService extends Service { // 알람이 실행 됬을때 시�
         } // 채널 설정
 
         Notification notification = builder.build(); // 노티피케이션 빌드
-        startForeground(1, notification);
+        startForeground(9, notification);
         stopForeground(false); // 제거 됨 // 이걸 이용하면 Foreground를 안 시킬수 있다.
 
         /////////////////////////////////////////////////////////////////////

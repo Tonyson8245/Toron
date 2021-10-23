@@ -34,6 +34,7 @@
             android:textStyle="bold" />
 
         <Button
+            android:visibility="gone"
             android:layout_width="70dp"
             android:layout_height="34dp"
             android:layout_gravity="center"
@@ -42,6 +43,16 @@
             android:background="@drawable/roundborder_toron"
             android:backgroundTint="#DADADA"
             android:text="토론생성" />
+        <Button
+            android:visibility="gone"
+            android:layout_width="70dp"
+            android:layout_height="34dp"
+            android:layout_gravity="center"
+            android:layout_marginRight="10dp"
+            android:id="@+id/btn_attach"
+            android:background="@drawable/roundborder_toron"
+            android:backgroundTint="#DADADA"
+            android:text="기사첨부" />
     </LinearLayout>
 
     <ScrollView

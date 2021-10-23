@@ -35,14 +35,14 @@
             android:layout_marginRight="20dp"
             android:gravity="center"
             android:text="프로필 설정" />
-
-        <Button
-            android:layout_gravity="center"
-            android:layout_marginRight="10dp"
-            android:background="@drawable/ic__964018_alarm_alert_attention_bell_notification_icon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:id="@+id/btn_alert"/>
+<!--        <Button-->
+<!--            android:visibility="gone"-->
+<!--            android:layout_gravity="center"-->
+<!--            android:layout_marginRight="10dp"-->
+<!--            android:background="@drawable/ic__964018_alarm_alert_attention_bell_notification_icon"-->
+<!--            android:layout_width="40dp"-->
+<!--            android:layout_height="40dp"-->
+<!--            android:id="@+id/btn_alert"/>-->
     </LinearLayout>
 
     <LinearLayout
@@ -76,7 +76,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="75dp"
+            android:layout_height="60dp"
             android:layout_marginTop="20dp"
             android:background="@drawable/customborder">
 
@@ -107,7 +107,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="75dp"
+            android:layout_height="60dp"
             android:background="@drawable/customborder">
 
             <de.hdodenhof.circleimageview.CircleImageView
@@ -137,7 +137,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="75dp"
+            android:layout_height="60dp"
             android:background="@drawable/customborder">
 
             <de.hdodenhof.circleimageview.CircleImageView
@@ -167,7 +167,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="75dp"
+            android:layout_height="60dp"
             android:layout_marginTop="0dp"
             android:background="@drawable/customborder">
 

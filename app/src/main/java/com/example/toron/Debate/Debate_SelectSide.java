@@ -11,15 +11,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.toron.Adapter.AttachArticleRecyclerAdapter;
-import com.example.toron.Adapter.NewsRecyclerAdapter;
-import com.example.toron.Adapter.ReplyRecyclerAdapter;
-import com.example.toron.News.News_detail;
 import com.example.toron.R;
 import com.example.toron.Retrofit.ApiClient;
 import com.example.toron.Retrofit.Class.New_article;
@@ -40,7 +35,7 @@ public class Debate_SelectSide extends AppCompatActivity {
     private AttachArticleRecyclerAdapter prosAdapter;
     TextView Tv_subject,Tv_description,Tv_cons_text,Tv_pros_text;
     String room_idx,side;
-    Button btn_con,btn_pro;
+    Button btn_con,btn_pro,btn_back;
     String TAG = "Debate_SelectSide";
     ArrayList<New_article> cons = new ArrayList<>(); // 반대
     ArrayList<New_article> pros = new ArrayList<>(); // 찬성
@@ -57,13 +52,20 @@ public class Debate_SelectSide extends AppCompatActivity {
         Tv_description = findViewById(R.id.Tv_description);
         Tv_cons_text = findViewById(R.id.cons_text);
         Tv_pros_text = findViewById(R.id.pros_text);
-        btn_con = findViewById(R.id.btn_con);
-        btn_pro = findViewById(R.id.btn_pro);
+        btn_con = findViewById(R.id.Tv_con);
+        btn_pro = findViewById(R.id.Tv_pro);
+        btn_back = findViewById(R.id.btn_back);
 
         Intent getData = getIntent();
         room_idx = getData.getStringExtra("room_idx");
         getRoomData(room_idx);
 
+        btn_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         cons_recyclerView.setHasFixedSize(true);
         consAdapter = new AttachArticleRecyclerAdapter(this, cons);
@@ -99,16 +101,24 @@ public class Debate_SelectSide extends AppCompatActivity {
                     Tv_subject.setText(response.body().getRoom_subject());
                     Tv_description.setText(response.body().getRoom_description());
 
-                    if(cons.size()>0) {
-                        cons = response.body().getCons();
-                        consAdapter.notifyDataSetChanged();
-                        consAdapter.setList(cons);
+                    cons = response.body().getCons();
+                    pros = response.body().getPros();
+
+                    if(cons!=null){
+                        if(cons.size()>0) {
+                            cons = response.body().getCons();
+                            consAdapter.notifyDataSetChanged();
+                            consAdapter.setList(cons);
+                        }
                     }
-                    if(pros.size()>0) {
-                        pros = response.body().getPros();
-                        prosAdapter.setList(pros);
-                        prosAdapter.notifyDataSetChanged();
+                    if(pros!=null) {
+                        if (pros.size() > 0) {
+                            pros = response.body().getPros();
+                            prosAdapter.setList(pros);
+                            prosAdapter.notifyDataSetChanged();
+                        }
                     }
+
                 }
             }
             @Override

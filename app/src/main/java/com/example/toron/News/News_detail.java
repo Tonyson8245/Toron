@@ -13,6 +13,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -56,13 +57,13 @@ public class News_detail extends AppCompatActivity {
 
     List<Reply> list = new ArrayList<>();
     private int page = 0;
-    String href,title,img,writing,datetime,news_idx;
+    String href,title,img,writing,datetime,news_idx,mode="detail";
     ImageView Img_news;
     EditText Ev_reply_content;
     TextView Tv_news_script,Tv_news_title,Tv_datetime,Tv_reply_qty,no_reply;
     ScrollView scrollview;
     LinearLayout reply_layout,layout_reply_qty;
-    Button btn_back,btn_website,btn_insert_reply,btn_update_reply,btn_make_dabete;
+    Button btn_back,btn_website,btn_insert_reply,btn_update_reply,btn_make_dabete,btn_attach;
     String TAG = "!!!DETAIL",sort="like",total_qty,user_id,user_idx;
     InputMethodManager imm;
     private RecyclerView recyclerView;
@@ -92,7 +93,13 @@ public class News_detail extends AppCompatActivity {
         news_idx = getdata.getStringExtra("news_idx");
         //인텐트
 
+        /// 첨부 쪽에서 건너온 녀석인지 확인
+        if(!TextUtils.isEmpty(getdata.getStringExtra("mode"))){
+            mode = getdata.getStringExtra("mode");
+        }
+
         Img_news = findViewById(R.id.Img_news);
+        btn_attach = findViewById(R.id.btn_attach);
         Ev_reply_content = findViewById(R.id.Ev_reply_content);
         Tv_reply_qty = findViewById(R.id.reply_qty);
         Tv_news_script = findViewById(R.id.TV_news_script);
@@ -119,6 +126,9 @@ public class News_detail extends AppCompatActivity {
         //리사이클러뷰 세팅
 
         imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+
+        if(mode.equals("attach")) btn_attach.setVisibility(View.VISIBLE);
+        else btn_make_dabete.setVisibility(View.VISIBLE);
 
         btn_back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -148,6 +158,16 @@ public class News_detail extends AppCompatActivity {
                 Intent make_debate = new Intent(News_detail.this,Debate_make.class);
                 make_debate.putExtra("URL",href);
                 startActivity(make_debate);
+            }
+        });
+        btn_attach.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent result = new Intent();
+                result.putExtra("title",title);
+                result.putExtra("href",href);
+                setResult(RESULT_OK,result);
+                finish();
             }
         });
         scrollview.setOnScrollChangeListener(new View.OnScrollChangeListener() {
@@ -211,6 +231,7 @@ public class News_detail extends AppCompatActivity {
                         else Tv_news_script.setText("");
                     }
                     else{
+                        news_idx = response.body().getNews_idx();
                         Tv_news_script.setVisibility(View.GONE);
                         if(news_idx.equals("no_news_idx")){
                             reply_layout.setVisibility(View.GONE);

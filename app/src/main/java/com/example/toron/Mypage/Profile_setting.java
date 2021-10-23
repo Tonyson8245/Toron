@@ -217,7 +217,8 @@ public class Profile_setting extends AppCompatActivity {
                                 String url = "http://49.247.195.99/storage/profile_img/" + user_idx + ".jpg";
 
                                 Picasso.get().invalidate(url);
-                                Picasso.get().load(url).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_profile);
+                                Picasso.get().load(url).into(img_profile); // picasso 에서 glide 로 교체
+//                                Picasso.get().load(url).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_profile); // picasso 에서 glide 로 교체
                             } catch (Exception e) {
                                 img_profile.setImageResource(R.mipmap.ic_launcher_round);
                             }
@@ -391,7 +392,7 @@ public class Profile_setting extends AppCompatActivity {
         Ev_date.setHint(user_birthday.replace("-","/"));
         Ev_nickname.setHint(user_nickname);
         try{
-            Picasso.get().load("http://49.247.195.99/storage/profile_img/" + user_idx + ".jpg").into(img_profile);
+            Picasso.get().load("http://49.247.195.99/storage/profile_img/" + user_idx + ".jpg").into(img_profile);// glide 로 교체
         }catch (Exception e){
             img_profile.setImageResource(R.mipmap.ic_launcher_round);
         }

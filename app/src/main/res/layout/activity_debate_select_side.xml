@@ -72,10 +72,10 @@
                 android:orientation="horizontal">
 
                 <TextView
+                    android:id="@+id/Tv_description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="200dp"
-                    android:id="@+id/Tv_description"
                     android:text="토론 내용 설명"
                     android:textSize="15dp" />
             </androidx.appcompat.widget.LinearLayoutCompat>
@@ -88,43 +88,47 @@
                 android:textStyle="bold"></TextView>
 
             <TextView
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
                 android:background="@drawable/roundborder"
                 android:backgroundTint="#C2D7FB"
-                android:layout_width="70dp"
                 android:gravity="center"
-                android:layout_height="wrap_content"
                 android:text="찬성 측"
-                android:textStyle="bold"
-                android:textSize="15dp"></TextView>
+                android:textSize="15dp"
+                android:textStyle="bold"></TextView>
+
             <TextView
-                android:visibility="gone"
+                android:id="@+id/pros_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="첨부된 기사가 없습니다."
                 android:layout_marginBottom="30dp"
-                android:id="@+id/pros_text"/>
+                android:text="첨부된 기사가 없습니다."
+                android:visibility="gone" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/dabate_recyclerview_pros"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="50dp"
                 android:orientation="vertical" />
-            <TextView
-                android:background="@drawable/roundborder"
-                android:backgroundTint="#FB8888"
-                android:layout_width="70dp"
-                android:gravity="center"
-                android:layout_height="wrap_content"
-                android:text="반대 측"
-                android:textStyle="bold"
-                android:textSize="15dp"></TextView>
 
             <TextView
-                android:visibility="gone"
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/roundborder"
+                android:backgroundTint="#FB8888"
+                android:gravity="center"
+                android:text="반대 측"
+                android:textSize="15dp"
+                android:textStyle="bold"></TextView>
+
+            <TextView
+                android:id="@+id/cons_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="첨부된 기사가 없습니다."
-                android:id="@+id/cons_text"/>
+                android:visibility="gone" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/dabate_recyclerview_cons"
                 android:layout_width="match_parent"
@@ -139,7 +143,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <Button
-            android:id="@+id/btn_pro"
+            android:id="@+id/Tv_pro"
             android:layout_margin="5dp"
             android:text="찬성"
             android:textSize="25dp"
@@ -149,7 +153,7 @@
             android:layout_width="0dp"
             android:layout_height="80dp"/>
         <Button
-            android:id="@+id/btn_con"
+            android:id="@+id/Tv_con"
             android:layout_margin="5dp"
             android:text="반대"
             android:textSize="25dp"
