@@ -6,9 +6,11 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.app.DatePickerDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -22,6 +24,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
@@ -35,6 +41,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.toron.Debate.Debate_room;
 import com.example.toron.Login.Join;
 import com.example.toron.Login.Login;
 import com.example.toron.Main.Mainpage;
@@ -45,6 +52,10 @@ import com.example.toron.Retrofit.Class.Userdata_response;
 import com.example.toron.Retrofit.Class.Yesno;
 import com.example.toron.Retrofit.Interface.Inquire_intface;
 import com.example.toron.Retrofit.Interface.UserdataInterface;
+import com.example.toron.Service.Class.Chat;
+import com.example.toron.Service.RemoteService;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
@@ -55,7 +66,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -68,6 +81,13 @@ import retrofit2.Response;
 
 
 public class Profile_setting extends AppCompatActivity {
+
+
+    private Messenger mServiceCallback = null;
+    // 서비스로부터 전달 받는 객체 바인딩 시 제공하는 IBinder 로 만들어진 Messenger 객체
+    private Messenger mClientCallback = new Messenger(new CallbackHandler());
+    // 액티비티 <-> 서비스 : 서비스에서 액티비티로 결과를 리턴을 받을 때 쓰임 ; HTTP 통신과 유사한 개념
+
 
     Boolean nickname_overlay=false;
     String TAG = "!!!profile",user_nickname,user_id,user_birthday,temp_nickname;
@@ -188,12 +208,79 @@ public class Profile_setting extends AppCompatActivity {
                 editor = sharedPreferences.edit();
                 editor.putString("auto_login","OFF");
                 editor.commit();
+                quit_socket();
                 startActivity(logout);
+                finish();
 
                 ActivityCompat.finishAffinity(Profile_setting.this);
             }
         });
     }
+
+
+
+
+    // 서비스 연결 끊기
+    public class CallbackHandler extends Handler {
+        Gson gson = new Gson();
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+
+            }
+        }
+    }
+
+    /// 서비스와 연결하고 , 서비스에서 오는 데이터에 따라 핸들러를 구동 시키는 부분
+    private ServiceConnection mConnection = new ServiceConnection(){
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) { //해당 서비스의 IBinder 라는 객체 생성
+            Log.d(TAG, "onServiceConnected");
+            mServiceCallback = new Messenger(service); // IBinder 를 통해 Messenger 객체 생성 가능
+            // mServiceCallback : 원하는 서비스의 Messegner 객체
+
+            // connect to service
+            Message connect_msg = Message.obtain( null, RemoteService.MSG_CLIENT_CONNECT);
+            connect_msg.replyTo = mClientCallback;
+            try {
+                mServiceCallback.send(connect_msg);
+                Log.d(TAG, "Send MSG_CLIENT_CONNECT message to Service");
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        } // 액티비티의 messenger 객체를 서비스에 전달
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mServiceCallback = null;
+        }
+    };
+
+
+    protected void onResume() {
+        super.onResume();
+        Log.d("mClient", "onResume:Debate_room");
+        Intent intent = new Intent(this, RemoteService.class); // 바인드를 위한 intent
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE); // 여기서 액티비티와 서비스를 바인드 해줌
+    }
+
+    public void quit_socket(){
+        if (mServiceCallback != null) {
+            // request 'add value' to service
+            Message message = Message.obtain(
+                    null, RemoteService.MSG_QUIT_SOCKET);
+            try {
+                mServiceCallback.send(message);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    //
+
+
+
 
     private Boolean profile_save() {
         if(profile_uri!=null) {

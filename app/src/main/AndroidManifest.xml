@@ -24,7 +24,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Vote.Vote_history"></activity>
+        <activity android:name=".Mypage.Vote_result_detail"></activity>
+        <activity android:name=".Mypage.Vote_result" />
+        <activity android:name=".Mypage.Mypage_reply_list" />
+        <activity android:name=".Mypage.Participate_debate" />
+        <activity android:name=".Mypage.Participate_vote" />
+        <activity android:name=".Vote.Vote_history" />
         <activity android:name=".Debate.Debate_chat_img" />
         <activity android:name=".Debate.Debate_SelectSide" />
         <activity android:name=".News.Search_news" />

@@ -85,12 +85,14 @@ public class News_detail extends AppCompatActivity {
         //쉐어드
 
         Intent getdata = getIntent();
+
         href = getdata.getStringExtra("href");
         title = getdata.getStringExtra("title");
         img = getdata.getStringExtra("img");
         writing = getdata.getStringExtra("writing");
         datetime = getdata.getStringExtra("datetime");
         news_idx = getdata.getStringExtra("news_idx");
+
         //인텐트
 
         /// 첨부 쪽에서 건너온 녀석인지 확인

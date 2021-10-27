@@ -44,7 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="논제 입력"
-            android:textSize="30dp"/>
+            android:textSize="23dp"/>
         <EditText
             android:background="@drawable/roundborder"
             android:id="@+id/Ev_description"
@@ -53,10 +53,10 @@
             android:minHeight="150dp"
             android:layout_weight="1"
             android:hint="토론 설명 입력"
-            android:textSize="20dp"/>
+            android:textSize="13dp"/>
         <LinearLayout
             android:layout_marginTop="30dp"
-            android:visibility="invisible"
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">

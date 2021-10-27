@@ -15,15 +15,12 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.toron.Class.PicassoTransformation;
 import com.example.toron.Debate.Debate_room;
 import com.example.toron.R;
 import com.example.toron.Service.Class.Chat;
+import com.example.toron.Vote.Vote_history;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
-//import com.squareup.picasso.MemoryPolicy;
-//import com.squareup.picasso.NetworkPolicy;
-//import com.squareup.picasso.Picasso;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,22 +28,22 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
-public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class ChatAdapter_vote extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public static final int VIEW_TYPE_A = 1;
     public static final int VIEW_TYPE_B = 2;
     Context context;
-    Debate_room debate_room;
+    Vote_history vote_history;
     String nickname,user_idx,TAG = "chatAdapter";
     private ArrayList<Chat> list = new ArrayList<>();
     private HashMap<String ,Integer> chat_list = new HashMap<>();
 
-    public ChatAdapter(ArrayList<Chat> list, Context context) {
+    public ChatAdapter_vote(Context context) {
         SharedPreferences sharedPreferences;
         sharedPreferences = context.getSharedPreferences("user_data",0);
         user_idx = sharedPreferences.getString("user_idx",null);
         this.context = context;
-        this.debate_room = (Debate_room) context;
+        this.vote_history = (Vote_history) context;
         this.list = list;
     }
 
@@ -122,22 +119,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 String url = "http://49.247.195.99/storage/chat_img/" + img_href;
                 Log.d(TAG,url);
 
-                Picasso.get().load(url).placeholder(R.drawable.ic_baseline_image_24).into(((AHolder) holder).Img_message, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        debate_room.toBottom(false);
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-
-                    }
-                });
+                Picasso.get().load(url).placeholder(R.drawable.ic_baseline_image_24).into(((AHolder) holder).Img_message);
 
                 ((AHolder) holder).Img_message.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        debate_room.open_img(url);
+                        vote_history.open_img(url);
                     }
                 });
             }
@@ -146,20 +133,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             //공통
             ((AHolder) holder).nickname.setText(nickname);
             ((AHolder) holder).datetime.setText(datetime);
-            ((AHolder) holder).profile.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    debate_room.set_TagMode(chat.getUser_idx(),nickname);
-                }
-            }); // 태그의 경우 한번 클릭
-            ((AHolder) holder).layout_other.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    debate_room.open_dialog(list.get(position).getChat_idx(),side);
-                    return false;
-                }
-            }); // 신고, 좋아요의 경우 Long button
-            // 이미지는 서버에서 가져온다
+                       // 이미지는 서버에서 가져온다
 
             Picasso.get().invalidate(imageStr);
 //            Picasso.get().load(imageStr).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).error(R.drawable.ic_baseline_account_circle_24).into(((AHolder) holder).profile);
@@ -187,17 +161,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 String url = "http://49.247.195.99/storage/chat_img/" + img_href;
                 Log.d(TAG,url);
 
-                Picasso.get().load(url).placeholder(R.drawable.ic_baseline_image_24).into(((BHolder) holder).Img_message, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        debate_room.toBottom(false);
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-
-                    }
-                });
+                Picasso.get().load(url).placeholder(R.drawable.ic_baseline_image_24).into(((BHolder) holder).Img_message);
             }
 
 
@@ -205,7 +169,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             ((BHolder) holder).nickname.setText(nickname);
             ((BHolder) holder).datetime.setText(datetime);
 
-            // 이미지는 서버에서 가져온다
 
             // 프로필 이미지
             Picasso.get().invalidate(imageStr);
@@ -222,8 +185,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.list = list;
 
         for(int i=0;i<list.size();i++){
-            if(list.get(i).getTag_user_idx()!=null) chat_list.put(list.get(i).getChat_idx(),i);
+            chat_list.put(list.get(i).getChat_idx(),i);
         }
+
+        Log.d(TAG,list.toString());
         notifyDataSetChanged();
     }
 

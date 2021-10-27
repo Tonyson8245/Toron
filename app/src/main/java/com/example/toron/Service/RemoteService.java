@@ -79,6 +79,8 @@ public class RemoteService extends Service {
     public static final int MSG_GET_CHAT = 8;
     public static final int MSG_CHECK_ACTIVITY = 9;
     public static final int MSG_SEND_IMG = 10;
+    public static final int MSG_QUIT_SOCKET = 11;
+
     String user_idx;
     NotificationChannel notificationChannel_chat;
 
@@ -134,6 +136,20 @@ public class RemoteService extends Service {
         super.onDestroy();
         setAlarmTimer(); // 여기서 알람을 만든다.
 
+        Request request = new Request("QUIT",null);
+        SendToServerThread sendToServerThread = new SendToServerThread(socket,gson.toJson(request));
+        sendToServerThread.start(); // 채팅 연결 종료
+
+        serviceIntent = null; // 서비스 인텐트 null
+        Thread.currentThread().interrupt(); // 서비스 쓰레드를 인터럽트 시켜서 더이상 작동이 안되게 한다. 이러면 null 이 될거다.
+
+        if (messageThread != null) { // mainThread 도 종료 시킨다.
+            messageThread.interrupt();
+            messageThread = null;
+        }
+    }
+
+    public void quit_socket(){
         Request request = new Request("QUIT",null);
         SendToServerThread sendToServerThread = new SendToServerThread(socket,gson.toJson(request));
         sendToServerThread.start(); // 채팅 연결 종료
@@ -203,6 +219,8 @@ public class RemoteService extends Service {
                 case MSG_SEND_IMG:
                     request_send_img(msg);
                     break;
+                case MSG_QUIT_SOCKET:
+                    quit_socket();
             }
         }
     }

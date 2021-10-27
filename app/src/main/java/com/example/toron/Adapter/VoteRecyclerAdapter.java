@@ -1,6 +1,7 @@
 package com.example.toron.Adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,9 +12,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.LinearLayoutCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.toron.Fragment.Vote_fragment;
@@ -67,8 +70,7 @@ public class VoteRecyclerAdapter extends RecyclerView.Adapter<VoteRecyclerAdapte
 
         TextView Tv_subject,Tv_description,Tv_view_num,Tv_participant_num,Tv_datetime,Tv_end_datetime,Tv_pro,Tv_con,Tv_nickname;
         ImageView Img_profile;
-        Button btn_enter_vote;
-        LinearLayout graphLayout;
+        Button btn_enter_vote,btn_already_vote;
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         SimpleDateFormat new_format = new SimpleDateFormat("yyyy-MM-dd");
         String end_day;
@@ -88,7 +90,7 @@ public class VoteRecyclerAdapter extends RecyclerView.Adapter<VoteRecyclerAdapte
             Tv_nickname = itemView.findViewById(R.id.Tv_nickname);
             Img_profile = itemView.findViewById(R.id.Img_profile_img);
             btn_enter_vote = itemView.findViewById(R.id.btn_enter_vote);
-            graphLayout = itemView.findViewById(R.id.graphLayout);
+            btn_already_vote = itemView.findViewById(R.id.btn_already_vote);
         }
 
         void onBind(Vote_list_data vote_list_data){
@@ -128,33 +130,23 @@ public class VoteRecyclerAdapter extends RecyclerView.Adapter<VoteRecyclerAdapte
 
             //투표 밑에 레이아웃
             if(vote_list_data.getVote_status().equals("1")){
-                graphLayout.setVisibility(View.VISIBLE);
                 btn_enter_vote.setVisibility(View.GONE);
-
-                //막대그래프 모양 형상화 하는 부분
-                pro_qty = vote_list_data.getVote_pro_num();
-                con_qty = vote_list_data.getVote_con_num();
-
-                total = Integer.valueOf(pro_qty) + Integer.valueOf(con_qty);
-                if(Integer.valueOf(pro_qty) == Integer.valueOf(con_qty)){
-                    pro_qty = "1";
-                    con_qty = "1";
-                }
-
-                Tv_pro.setLayoutParams(new LinearLayoutCompat.LayoutParams(LinearLayoutCompat.LayoutParams.WRAP_CONTENT, LinearLayoutCompat.LayoutParams.WRAP_CONTENT, (float) Integer.valueOf(pro_qty)));
-                Tv_con.setLayoutParams(new LinearLayoutCompat.LayoutParams(LinearLayoutCompat.LayoutParams.WRAP_CONTENT, LinearLayoutCompat.LayoutParams.WRAP_CONTENT, (float) Integer.valueOf(con_qty)));
-            }// 이미 들어 가있을 경우 찬성 반대 막대 그래프를
-            else{
-                graphLayout.setVisibility(View.GONE);
+                btn_already_vote.setVisibility(View.VISIBLE);
+            }// 이미 참여하였을 경우 이미 투표 하였다고 보여준다.
+            else {
                 btn_enter_vote.setVisibility(View.VISIBLE);
-            }// 들어가 있지 않다면 투표 참여 버튼을 만들어준다.
+                btn_already_vote.setVisibility(View.GONE);
+            }
 
-            btn_enter_vote.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mainpage.moveToHistory(vote_list_data.getVote_idx());
-                }
-            });
+            if(btn_enter_vote.isClickable()) {
+                btn_enter_vote.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (btn_enter_vote.isClickable())
+                            mainpage.moveToHistory(vote_list_data.getVote_idx());
+                    }
+                });
+            }
         }
     }
 

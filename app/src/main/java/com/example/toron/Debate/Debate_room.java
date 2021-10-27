@@ -104,11 +104,11 @@ public class Debate_room extends AppCompatActivity {
 
 
     LinearLayout tag_layout;
-    TextView Tv_subject,Tv_description,Tv_tag_nickname,pros_no_article,cons_no_article;
+    TextView Tv_subject,Tv_description,Tv_tag_nickname,pros_no_article,cons_no_article,tv_title2;
     ImageView btn_img_attach,Img_attach_img;
     EditText Ev_message_content;
     Button btn_send,btn_back,btn_tag_close,btn_show_detail,btn_image_attach_close,btn_send_img,btn_attach_pros,btn_attach_cons;
-    String TAG = "Debate_room",room_idx,side,tag_user_idx,tag_user_nickname,tag_chat_idx=null,user_idx,user_nickname,user_id;
+    String TAG = "Debate_room",room_idx,side,tag_user_idx,tag_user_nickname,tag_chat_idx=null,user_idx,user_nickname,user_id,status="debate";
     Date time = new Date();
     ScrollView layout_debate_info;
     LinearLayout message_layout,layout_img_attach;
@@ -155,9 +155,15 @@ public class Debate_room extends AppCompatActivity {
             tag_chat_idx = getData.getStringExtra("tag_chat_idx");
             Log.d(TAG,"tag" + tag_chat_idx);
         }// tag_메세지 때문에 들어옴
-        else tag_chat_idx = null;
+        else{
+            tag_chat_idx = null;
+            if(!TextUtils.isEmpty(getData.getStringExtra("status"))){
+                status = getData.getStringExtra("status");
+            }// 내가 참여한 토론 목록에서 넘어오는 것
+        }
 
         Tv_subject = findViewById(R.id.Tv_subject);
+        tv_title2 = findViewById(R.id.tv_title2);
         Tv_tag_nickname = findViewById(R.id.Tv_tag_nickname);
         Tv_description = findViewById(R.id.Tv_description);
         btn_send = findViewById(R.id.insert_message);
@@ -207,51 +213,16 @@ public class Debate_room extends AppCompatActivity {
                 finish();
             }
         });
-
-        btn_send.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                send_msg(Ev_message_content.getText().toString());
-                Ev_message_content.setText("");
-            }
-        });
-        btn_tag_close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                tag_layout.setVisibility(View.GONE);
-                TAG_MODE = false;//  TAG_MODE OFF
-                tag_user_idx = null;
-                tag_user_nickname = null;
-            }
-        });
-        btn_img_attach.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                tag_layout.setVisibility(View.GONE);
-                TAG_MODE = false;//  TAG_MODE OFF
-                tag_user_idx = null;
-                tag_user_nickname = null;
-                img_mode = true;
-                Intent intent = new Intent(Intent.ACTION_PICK);
-                intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
-                startActivityForResult(intent,GALLEY_CODE);
-//                Intent ImgIntent = new Intent();
-//                ImgIntent.setType("image/*");
-//                ImgIntent.setAction(Intent.ACTION_GET_CONTENT);
-//                startActivityForResult(ImgIntent, GALLEY_CODE);
-            }
-        });
         btn_show_detail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(DETAIL_MODE){
+                if (DETAIL_MODE) {
                     DETAIL_MODE = false;
                     chat_RecyclerView.setVisibility(View.GONE);
                     message_layout.setVisibility(View.GONE);
                     layout_debate_info.setVisibility(View.VISIBLE);
                     btn_show_detail.setText("내용 닫기");
-                }
-                else{
+                } else {
                     DETAIL_MODE = true;
                     chat_RecyclerView.setVisibility(View.VISIBLE);
                     message_layout.setVisibility(View.VISIBLE);
@@ -260,23 +231,67 @@ public class Debate_room extends AppCompatActivity {
                 }
             }
         });
-        btn_image_attach_close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                layout_img_attach.setVisibility(View.GONE);
-                message_layout.setVisibility(View.VISIBLE);
-            }
-        });
-        btn_send_img.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG,img_uri.toString());
-                send_img(); // 이미지 전송
 
-                layout_img_attach.setVisibility(View.GONE); // 이미지 전송 레이아웃 끄고
-                message_layout.setVisibility(View.VISIBLE); // 채팅 레이아웃 키고
-            }
-        });
+        if(status.equals("debate")) {
+            btn_send.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    send_msg(Ev_message_content.getText().toString());
+                    Ev_message_content.setText("");
+                }
+            });
+            btn_tag_close.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    tag_layout.setVisibility(View.GONE);
+                    TAG_MODE = false;//  TAG_MODE OFF
+                    tag_user_idx = null;
+                    tag_user_nickname = null;
+                }
+            });
+            btn_img_attach.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    tag_layout.setVisibility(View.GONE);
+                    TAG_MODE = false;//  TAG_MODE OFF
+                    tag_user_idx = null;
+                    tag_user_nickname = null;
+                    img_mode = true;
+                    Intent intent = new Intent(Intent.ACTION_PICK);
+                    intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
+                    startActivityForResult(intent, GALLEY_CODE);
+//                Intent ImgIntent = new Intent();
+//                ImgIntent.setType("image/*");
+//                ImgIntent.setAction(Intent.ACTION_GET_CONTENT);
+//                startActivityForResult(ImgIntent, GALLEY_CODE);
+                }
+            });
+            btn_image_attach_close.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    layout_img_attach.setVisibility(View.GONE);
+                    message_layout.setVisibility(View.VISIBLE);
+                }
+            });
+            btn_send_img.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d(TAG, img_uri.toString());
+                    send_img(); // 이미지 전송
+
+                    layout_img_attach.setVisibility(View.GONE); // 이미지 전송 레이아웃 끄고
+                    message_layout.setVisibility(View.VISIBLE); // 채팅 레이아웃 키고
+                }
+            });
+        }// 중료 안됬을시
+        else{
+            Ev_message_content.setText("이미 종료된 토론입니다.");
+            Ev_message_content.setFocusable(false);
+            Ev_message_content.setClickable(false);
+            Ev_message_content.setEnabled(false);
+            btn_send.setClickable(false);
+            btn_send_img.setClickable(false);
+        }// 토론 종료시
         chat_RecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -288,16 +303,17 @@ public class Debate_room extends AppCompatActivity {
         btn_attach_pros.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                search_article();
+                if(!status.equals("debate")) Toast.makeText(getApplication(),"이미 종료된 토론입니다.",Toast.LENGTH_SHORT).show();
+                else search_article();
             }
         });
         btn_attach_cons.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                search_article();
+                if(!status.equals("debate")) Toast.makeText(getApplication(),"이미 종료된 토론입니다.",Toast.LENGTH_SHORT).show();
+                else search_article();
             }
         });
-
     }
 
 
@@ -336,7 +352,7 @@ public class Debate_room extends AppCompatActivity {
     }
 
 
-    private class CallbackHandler extends Handler  {
+    public class CallbackHandler extends Handler  {
         Gson gson = new Gson();
         @Override
         public void handleMessage(Message msg) {
@@ -389,6 +405,7 @@ public class Debate_room extends AppCompatActivity {
             public void onResponse(Call<com.example.toron.Retrofit.Class.Room_data> call, Response<com.example.toron.Retrofit.Class.Room_data> response) {
                 if(response.body()!=null && response.isSuccessful()){
                     Tv_subject.setText(response.body().getRoom_subject());
+                    tv_title2.setText(response.body().getRoom_subject());
                     Tv_description.setText(response.body().getRoom_description());
                     side = response.body().getUser_maker();
 

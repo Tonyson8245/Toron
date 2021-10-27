@@ -256,7 +256,7 @@ public class Mainpage extends AppCompatActivity {
     }
 
     public void moveToHistory(String vote_idx) {
-        Toast.makeText(this,"토론 기록으로 이동합니다.",Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this,"토론 기록으로 이동합니다.",Toast.LENGTH_SHORT).show();
         Intent history = new Intent(Mainpage.this, Vote_history.class);
         history.putExtra("vote_idx",vote_idx);
         startActivity(history);

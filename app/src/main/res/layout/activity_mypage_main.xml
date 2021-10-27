@@ -75,9 +75,43 @@
             android:textSize="25dp" />
 
         <LinearLayout
+            android:clickable="true"
+            android:layout_marginTop="20dp"
+            android:id="@+id/layout_completed_vote"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:layout_marginTop="20dp"
+            android:background="@drawable/customborder">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginLeft="20dp"
+                android:src="@drawable/ic_baseline_grade_24"
+                app:civ_border_color="@color/white"
+                app:civ_border_width="2dp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="내가 참여한 투표 결과"
+                android:textSize="17dp" />
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:layout_weight="0.1"
+                android:background="@drawable/ic_baseline_arrow_forward_ios_24" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:clickable="true"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:id="@+id/layout_participate_vote_list"
             android:background="@drawable/customborder">
 
             <de.hdodenhof.circleimageview.CircleImageView
@@ -86,8 +120,7 @@
                 android:layout_gravity="center"
                 android:layout_marginLeft="20dp"
                 android:src="@drawable/ic_baseline_how_to_vote_24"
-                app:civ_border_color="@color/gray_200"
-                app:civ_border_width="2dp" />
+                app:civ_border_color="@color/gray_200" />
 
             <TextView
                 android:layout_width="0dp"
@@ -108,6 +141,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="60dp"
+            android:id="@+id/layout_debate"
+            android:clickable="true"
             android:background="@drawable/customborder">
 
             <de.hdodenhof.circleimageview.CircleImageView
@@ -117,7 +152,7 @@
                 android:layout_marginLeft="20dp"
                 android:src="@drawable/ic__698591_chat_communication_conversation_talk_icon"
                 app:civ_border_color="@color/gray_200"
-                app:civ_border_width="2dp" />
+                />
 
             <TextView
                 android:layout_width="0dp"
@@ -136,8 +171,10 @@
         </LinearLayout>
 
         <LinearLayout
+            android:clickable="true"
             android:layout_width="match_parent"
             android:layout_height="60dp"
+            android:id="@+id/layout_reply"
             android:background="@drawable/customborder">
 
             <de.hdodenhof.circleimageview.CircleImageView
@@ -147,7 +184,7 @@
                 android:layout_marginLeft="20dp"
                 android:src="@drawable/ic_baseline_reply_24"
                 app:civ_border_color="@color/gray_200"
-                app:civ_border_width="2dp" />
+                 />
 
             <TextView
                 android:layout_width="0dp"
@@ -165,35 +202,6 @@
                 android:background="@drawable/ic_baseline_arrow_forward_ios_24" />
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginTop="0dp"
-            android:background="@drawable/customborder">
 
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_gravity="center"
-                android:layout_marginLeft="20dp"
-                android:src="@drawable/ic_baseline_grade_24"
-                app:civ_border_color="@color/white"
-                app:civ_border_width="2dp" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="즐겨찾기한 기사"
-                android:textSize="17dp" />
-
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="30dp"
-                android:layout_gravity="center"
-                android:layout_weight="0.1"
-                android:background="@drawable/ic_baseline_arrow_forward_ios_24" />
-        </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

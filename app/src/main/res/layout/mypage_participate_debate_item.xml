@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:clickable="true"
+        android:id="@+id/btn_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+        <ImageView
+            android:id="@+id/img_thumb_up"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:padding="10dp"
+            android:src="@drawable/ic_baseline_thumb_up_24"
+            app:tint="#C2D7FB" />
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/img_thumb_down"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:padding="10dp"
+            android:src="@drawable/ic_baseline_thumb_down_alt_24"
+            app:tint="#FB8888" />
+        <TextView
+            android:id="@+id/title"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="토론 명"
+            android:textColor="#303030"
+            android:textSize="15dp" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginRight="5dp"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="80dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_margin="3dp"
+                android:text="진행중 토론"
+                android:textSize="13dp"
+                android:gravity="center"
+                android:id="@+id/debate_status_proceed"
+                android:textColor="@color/black"
+                android:background="@drawable/roundborder"
+                android:backgroundTint="#A7EF68"/>
+            <TextView
+                android:visibility="gone"
+                android:layout_width="80dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_margin="3dp"
+                android:text="종료된 토론"
+                android:textSize="13dp"
+                android:gravity="center"
+                android:id="@+id/debate_status_end"
+                android:textColor="@color/white"
+                android:background="@drawable/roundborder"
+                android:backgroundTint="@color/gray_500"/>
+            <TextView
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#303030"
+                android:id="@+id/tv_debate_end_date"
+                android:textSize="10dp"
+                android:text="2021.10.25 10:12"
+                />
+        </LinearLayout>
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#aaa"/>
+</LinearLayout>

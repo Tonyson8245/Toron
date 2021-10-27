@@ -12,6 +12,7 @@ import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.toron.Class.ImageLoadTask;
@@ -26,8 +27,9 @@ public class Mypage_main extends AppCompatActivity {
 
     TextView Tv_user_nickname,Tv_profile_setting;
     ImageView img_profile;
+    LinearLayout layout_participate_vote_list,layout_completed_vote,layout_debate,layout_reply;
 
-    String user_id,user_nickname,user_idx;
+    String user_id,user_nickname,user_idx,TAG = "Mypage_main";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +38,10 @@ public class Mypage_main extends AppCompatActivity {
 
         Tv_user_nickname = findViewById(R.id.Tv_user_nickname);
         Tv_profile_setting = findViewById(R.id.Tv_profile_setting);
+        layout_completed_vote = findViewById(R.id.layout_completed_vote);
+        layout_debate = findViewById(R.id.layout_debate);
+        layout_reply = findViewById(R.id.layout_reply);
+        layout_participate_vote_list = findViewById(R.id.layout_participate_vote_list);
 
         img_profile = findViewById(R.id.img_profile);
 
@@ -46,6 +52,33 @@ public class Mypage_main extends AppCompatActivity {
                 startActivity(profile_setting);
             }
         });
+
+        layout_participate_vote_list.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG,"layout_participate_vote_list::click");
+                Intent participate_list = new Intent(getApplicationContext(),Participate_vote.class);
+                startActivity(participate_list);
+            }
+        });
+        layout_reply.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        layout_debate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        layout_completed_vote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
     }
 
     @Override
@@ -53,6 +86,7 @@ public class Mypage_main extends AppCompatActivity {
         super.onResume();
         get_userdata();
     }
+
 
 
     void get_userdata(){

@@ -10,13 +10,13 @@
         android:gravity="center_vertical">
 
         <TextView
-            android:layout_marginVertical="5dp"
+            android:layout_marginVertical="3dp"
             android:layout_marginLeft="5dp"
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="기사 제목"
-            android:textSize="15dp"
+            android:textSize="13dp"
             android:ellipsize="marquee"
             android:maxLines="1"
             android:textColor="#505050"/>

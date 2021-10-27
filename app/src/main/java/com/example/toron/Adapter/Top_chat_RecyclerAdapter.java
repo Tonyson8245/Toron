@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.toron.Debate.Debate_SelectSide;
 import com.example.toron.R;
 import com.example.toron.Retrofit.Class.Vote_Top_chat;
+import com.example.toron.Vote.Vote_history;
 
 import java.util.List;
 
@@ -20,15 +21,17 @@ public class Top_chat_RecyclerAdapter extends RecyclerView.Adapter<Top_chat_Recy
 
     private Context context;
     private List<Vote_Top_chat> List;
+    private Vote_history vote_history;
     private int rank=0;
 
     public Top_chat_RecyclerAdapter(Context context, java.util.List<Vote_Top_chat> list) {
         this.context = context;
+        this.vote_history = (Vote_history) context;
         List = list;
     }
 
     public Top_chat_RecyclerAdapter(Context context) {
-        this.context = context;
+        this.context = context; this.vote_history = (Vote_history) context;
     }
 
     public void setList(java.util.List<Vote_Top_chat> list) {
@@ -70,6 +73,13 @@ public class Top_chat_RecyclerAdapter extends RecyclerView.Adapter<Top_chat_Recy
         void onBind(Vote_Top_chat vote_top_chat){
             rank +=1;
             title.setText(vote_top_chat.getChat_content());
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    vote_history.totTagMessage(vote_top_chat.getChat_idx());
+                }
+            });
         }
     }
 
